@@ -17,7 +17,7 @@
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
                 ⚡ <span>TRACK TWEETS & GRAMS</span>
             </h1>
-            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">High-density meet data formatted instantly for social platforms.</p>
+            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">High-density meet data formatted instantly for social platforms. · v6 (row logo sizing)</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
@@ -45,6 +45,46 @@
                             <label class="block text-xs font-semibold text-gray-400 mb-1">Live Results URL <span class="text-[10px] text-gray-500 font-normal">(Optional)</span></label>
                             <input type="text" id="linkInput" oninput="renderSocialPost(); updateScorePost();" placeholder="e.g. live.athletic.net/meets/..." 
                                    class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 pt-1">
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Logo — Top Left</label>
+                                <label class="flex flex-col items-center justify-center w-full h-16 bg-gray-900 border border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-amber-400 transition-colors relative overflow-hidden">
+                                    <span id="logoLeftLabel" class="text-[10px] text-gray-500 text-center px-1">Click to upload</span>
+                                    <img id="logoLeftPreview" class="hidden absolute inset-0 w-full h-full object-contain p-1">
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleLogoUpload(this, 'left')">
+                                </label>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Logo — Top Right</label>
+                                <label class="flex flex-col items-center justify-center w-full h-16 bg-gray-900 border border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-amber-400 transition-colors relative overflow-hidden">
+                                    <span id="logoRightLabel" class="text-[10px] text-gray-500 text-center px-1">Click to upload</span>
+                                    <img id="logoRightPreview" class="hidden absolute inset-0 w-full h-full object-contain p-1">
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleLogoUpload(this, 'right')">
+                                </label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Logo — Athlete Row <span class="text-[10px] text-gray-500 font-normal">(scoreboard bug next to name)</span></label>
+                            <label class="flex items-center gap-3 w-full h-14 bg-gray-900 border border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-amber-400 transition-colors relative overflow-hidden px-3">
+                                <span id="logoRowLabel" class="text-[10px] text-gray-500">Click to upload</span>
+                                <img id="logoRowPreview" class="hidden h-10 w-auto object-contain">
+                                <input type="file" accept="image/*" class="hidden" onchange="handleLogoUpload(this, 'row')">
+                            </label>
+                            <div class="flex items-center gap-3 mt-2">
+                                <label class="text-[10px] text-gray-400 font-semibold whitespace-nowrap">Row Logo Size</label>
+                                <input type="range" id="logoRowSize" min="24" max="100" value="52" 
+                                       oninput="document.getElementById('logoRowSizeVal').innerText = this.value + 'px'; const sel = document.getElementById('eventSelector').value; if(sel) renderSocialPost();"
+                                       class="flex-1 accent-amber-400 h-1">
+                                <span id="logoRowSizeVal" class="text-[10px] text-amber-400 font-mono w-8">52px</span>
+                            </div>
+                            <div class="flex items-center gap-3 mt-2">
+                                <label class="text-[10px] text-gray-400 font-semibold whitespace-nowrap">Vertical Nudge</label>
+                                <input type="range" id="logoRowOffsetY" min="-40" max="40" value="0"
+                                       oninput="document.getElementById('logoRowOffsetVal').innerText = (this.value > 0 ? '+' : '') + this.value; const sel = document.getElementById('eventSelector').value; if(sel) renderSocialPost();"
+                                       class="flex-1 accent-amber-400 h-1">
+                                <span id="logoRowOffsetVal" class="text-[10px] text-amber-400 font-mono w-8">0</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -189,7 +229,60 @@
     <script>
         let parsedMeetDatabase = {};
         let currentPlacementCap = 3; 
-        let genderPriority = 'girls'; 
+        let genderPriority = 'girls';
+        let logoLeftImg = null;
+        let logoRightImg = null;
+        let logoRowImg = null;
+
+        function handleLogoUpload(input, side) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    if (side === 'left') {
+                        logoLeftImg = img;
+                        document.getElementById('logoLeftPreview').src = e.target.result;
+                        document.getElementById('logoLeftPreview').classList.remove('hidden');
+                        document.getElementById('logoLeftLabel').classList.add('hidden');
+                    } else if (side === 'row') {
+                        logoRowImg = img;
+                        document.getElementById('logoRowPreview').src = e.target.result;
+                        document.getElementById('logoRowPreview').classList.remove('hidden');
+                        document.getElementById('logoRowLabel').classList.add('hidden');
+                    } else {
+                        logoRightImg = img;
+                        document.getElementById('logoRightPreview').src = e.target.result;
+                        document.getElementById('logoRightPreview').classList.remove('hidden');
+                        document.getElementById('logoRightLabel').classList.add('hidden');
+                    }
+                    // Redraw current canvas if event is already selected
+                    const sel = document.getElementById('eventSelector').value;
+                    if (sel) renderSocialPost();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function drawLogosOnCanvas(ctx) {
+            const logoSize = 130;
+            const pad = 20;
+            if (logoLeftImg) {
+                // Draw with contain-fit into a square box, maintaining aspect ratio
+                const ratio = Math.min(logoSize / logoLeftImg.width, logoSize / logoLeftImg.height);
+                const w = logoLeftImg.width * ratio;
+                const h = logoLeftImg.height * ratio;
+                ctx.drawImage(logoLeftImg, pad, pad, w, h);
+            }
+            if (logoRightImg) {
+                const ratio = Math.min(logoSize / logoRightImg.width, logoSize / logoRightImg.height);
+                const w = logoRightImg.width * ratio;
+                const h = logoRightImg.height * ratio;
+                ctx.drawImage(logoRightImg, 1080 - pad - w, pad, w, h);
+            }
+        }
 
         function cleanPerformanceMark(markStr) {
             if(!markStr) return "";
@@ -672,9 +765,25 @@
                     ctx.textAlign = 'left';
                     ctx.fillText(getOrdinalSuffix(runner.rank), 180, rowY + 6);
 
+                    // Row logo: sits right after rank text, before athlete name
+                    // Rank text ends around x=255 for widest case ("8th"), logo starts at 258
+                    let nameX = 310;
+                    if (logoRowImg) {
+                        const rowLogoMaxH = parseInt(document.getElementById('logoRowSize').value) || 52;
+                        // For wide logos, also cap by a max width so it doesn't eat into name space
+                        const rowLogoMaxW = 120;
+                        const ratio = Math.min(rowLogoMaxH / logoRowImg.height, rowLogoMaxW / logoRowImg.width);
+                        const lw = logoRowImg.width * ratio;
+                        const lh = logoRowImg.height * ratio;
+                        const logoX = 258;
+                        const logoY = rowY - lh / 2;
+                        ctx.drawImage(logoRowImg, logoX, logoY, lw, lh);
+                        nameX = logoX + lw + 10;
+                    }
+
                     ctx.fillStyle = '#ffffff';
                     ctx.font = '900 38px sans-serif';
-                    ctx.fillText(runner.athleteName, 310, rowY + 6);
+                    ctx.fillText(runner.athleteName, nameX, rowY + 6);
 
                     ctx.fillStyle = '#fbbf24'; 
                     ctx.font = 'bold 40px monospace';
@@ -709,6 +818,7 @@
                 ctx.fillText(subtitle, 540, 1030);
             }
 
+            drawLogosOnCanvas(ctx);
             document.getElementById('instagramPreviewImage').src = canvas.toDataURL('image/png');
         }
 
@@ -871,7 +981,17 @@
                     bulkCtx.fillStyle = '#fbbf24'; bulkCtx.fillRect(140, currentYPosition, 15, totalBoxHeight);
 
                     bulkCtx.fillStyle = '#ffffff'; bulkCtx.font = '900 36px sans-serif'; bulkCtx.textAlign = 'left';
-                    bulkCtx.fillText(athlete.fullName.toUpperCase(), 180, currentYPosition + 54);
+                    let bulkNameX = 180;
+                    if (logoRowImg) {
+                        const rowLogoMaxH = parseInt(document.getElementById('logoRowSize').value) || 52;
+                        const rowLogoMaxW = 120;
+                        const ratio = Math.min(rowLogoMaxH / logoRowImg.height, rowLogoMaxW / logoRowImg.width);
+                        const lw = logoRowImg.width * ratio;
+                        const lh = logoRowImg.height * ratio;
+                        bulkCtx.drawImage(logoRowImg, bulkNameX, currentYPosition + 54 - lh + 4, lw, lh);
+                        bulkNameX += lw + 10;
+                    }
+                    bulkCtx.fillText(athlete.fullName.toUpperCase(), bulkNameX, currentYPosition + 54);
 
                     bulkCtx.fillStyle = '#222222'; bulkCtx.fillRect(820, currentYPosition + 30, 95, 45);
                     bulkCtx.fillStyle = '#a1a1aa'; bulkCtx.font = 'bold 20px sans-serif'; bulkCtx.textAlign = 'center';
@@ -888,6 +1008,8 @@
                 }
 
                 let slideDataUrl = bulkCanvas.toDataURL('image/png');
+                drawLogosOnCanvas(bulkCtx);
+                slideDataUrl = bulkCanvas.toDataURL('image/png');
                 let graphicCardWrapper = document.createElement('div');
                 graphicCardWrapper.className = "bg-gray-900 p-3 rounded-xl border border-gray-700 flex flex-col justify-between items-center text-center space-y-3 shadow-md";
                 graphicCardWrapper.innerHTML = `
