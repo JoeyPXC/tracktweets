@@ -46,7 +46,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-400 mb-1">Live Results URL <span class="text-[10px] text-gray-500 font-normal">(Optional)</span></label>
-                            <input type="text" id="linkInput" oninput="renderSocialPost(); updateScorePost();" placeholder="e.g. athletic.net/meet/12345/results" 
+                            <input type="text" id="linkInput" oninput="renderSocialPost(); updateScorePost();" placeholder="e.g. milesplit.live/meets/..." 
                                    class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600">
                         </div>
                     </div>
@@ -54,13 +54,16 @@
 
                 <!-- Step 2: Paste Clipboard Text -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">2. Paste Athletic.net Data</h2>
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400">2. Paste Raw Meet Data</h2>
+                        <span class="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded font-semibold border border-gray-700">Supports Athletic.net & MileSplit Live</span>
+                    </div>
                     <textarea id="rawResults" rows="5" 
-                              placeholder="Select All (Ctrl+A) and paste results here..." 
+                              placeholder="Copy from browser and paste here... (Works directly from mobile browsers!)" 
                               onfocus="this.select()"
                               class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600 transition-all lg:h-40"></textarea>
                     
-                    <button onclick="processAthleticNetData()" 
+                    <button onclick="processUniversalMeetData()" 
                             class="w-full mt-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold py-3 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md">
                         Build Social Lists 📊
                     </button>
@@ -210,6 +213,7 @@
 
         function cleanPerformanceMark(markStr) {
             if(!markStr) return "";
+            // Clean fat timing tags
             let clean = markStr.replace(/(\d+(\.\d+)?)\s*[aAhH]+\b/g, '$1');
             clean = clean.replace(/(\d+)\s*[aA]$/g, '$1');
             
@@ -237,7 +241,6 @@
             genderPriority = order;
             document.getElementById('genderGirlsFirst').className = order === 'girls' ? "py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all" : "py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
             document.getElementById('genderBoysFirst').className = order === 'boys' ? "py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all" : "py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
-            
             populateEventSelector();
         }
 
@@ -259,6 +262,7 @@
             clean = clean.replace(/\s*-\s*$/g, "").trim();
             clean = clean.replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "");
             clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
+            clean = clean.replace(/(\d+)\s*meter\s+Dash/gi, "$1m Dash");
 
             clean = clean.replace(/4x100\s*Relay/i, "4x100 Relay");
             clean = clean.replace(/4x200\s*Relay/i, "4x200 Relay");
@@ -276,31 +280,134 @@
             return baseTitle;
         }
 
-        function processAthNetLine(cleanedDetails) {
-            let processingText = cleanedDetails.replace(/^\d+\.\s+/, '');
-            processingText = stripWindReadings(processingText);
-            
-            let loggedAsPR = /PB\b|PR\b|SB\b/i.test(processingText);
-            processingText = processingText.replace(/\s*(PR|PB|SB)\s*/i, '').trim();
-            
-            processingText = processingText.replace(/^([56789]|10|11|12)\s+/, '');
-
-            let namePart = processingText.replace(/[\d\.\:\-].*$/, '').trim();
-            let markPart = processingText.substring(processingText.indexOf(namePart) + namePart.length).trim();
-            markPart = cleanPerformanceMark(markPart);
-
-            return { name: namePart, mark: markPart, isPR: loggedAsPR };
-        }
-
-        function processAthleticNetData() {
-            const rawText = document.getElementById('rawResults').value;
-            const targetSchool = document.getElementById('schoolInput').value.trim();
-
-            if (!rawText || !targetSchool) {
-                alert("Please paste your raw data and specify your school filters.");
+        // UNIVERSAL PROCESSING DISPATCH ENGINE
+        function processUniversalMeetData() {
+            const rawText = document.getElementById('rawResults').value.trim();
+            if (!rawText) {
+                alert("Please paste your raw results data first!");
                 return;
             }
 
+            // Detect Engine Source Identity
+            if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top")) {
+                processMileSplitLiveData(rawText);
+            } else {
+                processAthleticNetData(rawText);
+            }
+        }
+
+        // NEW PARSING ENGINE: MILESPLIT LIVE
+        function processMileSplitLiveData(rawText) {
+            const targetSchool = document.getElementById('schoolInput').value.trim();
+            parsedMeetDatabase = {};
+
+            const normalizedText = rawText.replace(/\r\n/g, '\n');
+            const lines = normalizedText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            let currentGenderSection = "Boys";
+            let currentEventName = "Unknown Event";
+
+            // Attempt Header Scraping detection inside MileSplit Stream
+            for(let i=0; i<Math.min(lines.length, 12); i++){
+                let headerLine = lines[i];
+                if(/Girls|Womens/i.test(headerLine)) currentGenderSection = "Girls";
+                if(/Boys|Mens/i.test(headerLine)) currentGenderSection = "Boys";
+                if(/Dash|Hurdles|Meters|Relay|Run|Shot|Discus|Javelin|Vault|Jump/i.test(headerLine) && !headerLine.includes("Live Events")){
+                    currentEventName = cleanEventTitle(headerLine, currentGenderSection);
+                    break;
+                }
+            }
+
+            if (!parsedMeetDatabase[currentEventName]) {
+                parsedMeetDatabase[currentEventName] = [];
+            }
+
+            const schoolRegex = new RegExp(targetSchool.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
+            
+            let trackingPlace = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+
+                // Detect shifting header structures on mobile copy streams
+                if (/\b(Boys|Girls)\s+\d+/i.test(line) || (/\b(Boys|Girls)\s+\w+\s+(Dash|Run|Hurdles|Relay)/i.test(line))) {
+                    let inferredGender = line.toLowerCase().includes("girls") ? "Girls" : "Boys";
+                    currentEventName = cleanEventTitle(line, inferredGender);
+                    if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
+                    trackingPlace = 0; // Reset tracking scope context
+                    continue;
+                }
+
+                // Identify structural Row Start Sequences inside MileSplit data blocks
+                let placeMatch = line.match(/^(\d+)\s*$/);
+                if (placeMatch) {
+                    let extractedPlace = parseInt(placeMatch[1]);
+                    
+                    // Look forward to extract block values safely across variable line counts
+                    let pointer = i + 1;
+                    let blockLines = [];
+                    while(pointer < lines.length && blockLines.length < 8) {
+                        if (/^\d+\s*$/.test(lines[pointer])) break; // Found next runner index row
+                        if (/\b(Boys|Girls)\b/i.test(lines[pointer]) && pointer > i + 3) break; // Event boundary check
+                        blockLines.push(lines[pointer]);
+                        pointer++;
+                    }
+
+                    // Pack blocks down into flattened parsing scopes
+                    let completeBlockString = blockLines.join(" ");
+                    
+                    // Strip arbitrary layout decorations
+                    completeBlockString = completeBlockString.replace(/\d+\s*pts\s*/gi, "");
+                    completeBlockString = completeBlockString.replace(/OH\s+Top\s+\d+/gi, "");
+                    completeBlockString = completeBlockString.replace(/\s*\*\s*/g, ""); // Remove record asterisks
+
+                    if (schoolRegex.test(completeBlockString)) {
+                        // Extract structural elements using spatial layout markers
+                        let parts = completeBlockString.split(/\s+/);
+                        
+                        let yearIndex = parts.findIndex(p => /^(10|11|12|9|8|7)$/.test(p));
+                        let athleteName = "";
+                        let teamName = "";
+                        let mark = "";
+                        let isPR = completeBlockString.includes("PR") || completeBlockString.includes("PB");
+
+                        if (yearIndex !== -1) {
+                            athleteName = parts.slice(0, yearIndex).join(" ");
+                            
+                            // Re-anchor search vectors at tail ends for performance times
+                            let timeIndex = parts.findIndex((p, idx) => idx > yearIndex && /^\d{1,2}\.\d{2}$/.test(p));
+                            if (timeIndex !== -1) {
+                                teamName = parts.slice(yearIndex + 1, timeIndex).join(" ");
+                                mark = parts[timeIndex];
+                            } else {
+                                // Field events fallback logic
+                                teamName = parts.slice(yearIndex + 1, parts.length - 1).join(" ");
+                                mark = parts[parts.length - 1];
+                            }
+                        } else {
+                            // Backup row split parameters if Year layout block is omitted
+                            athleteName = parts.slice(0, 2).join(" ");
+                            mark = parts[parts.length - 1];
+                            teamName = parts.slice(2, parts.length - 1).join(" ");
+                        }
+
+                        parsedMeetDatabase[currentEventName].push({
+                            rank: extractedPlace,
+                            athleteName: athleteName.trim(),
+                            mark: cleanPerformanceMark(mark),
+                            isPR: isPR
+                        });
+                    }
+                    i = pointer - 1; // Advance pointer stream past processed data block
+                }
+            }
+
+            finalizeParsingSequence();
+        }
+
+        // ORIGINAL ATHLETIC.NET PARSING ENGINE
+        function processAthleticNetData(rawText) {
+            const targetSchool = document.getElementById('schoolInput').value.trim();
             parsedMeetDatabase = {};
             const lines = rawText.split('\n').map(l => l.trim());
             
@@ -364,6 +471,26 @@
                 }
             }
 
+            finalizeParsingSequence();
+        }
+
+        function processAthNetLine(cleanedDetails) {
+            let processingText = cleanedDetails.replace(/^\d+\.\s+/, '');
+            processingText = stripWindReadings(processingText);
+            
+            let loggedAsPR = /PB\b|PR\b|SB\b/i.test(processingText);
+            processingText = processingText.replace(/\s*(PR|PB|SB)\s*/i, '').trim();
+            
+            processingText = processingText.replace(/^([56789]|10|11|12)\s+/, '');
+
+            let namePart = processingText.replace(/[\d\.\:\-].*$/, '').trim();
+            let markPart = processingText.substring(processingText.indexOf(namePart) + namePart.length).trim();
+            markPart = cleanPerformanceMark(markPart);
+
+            return { name: namePart, mark: markPart, isPR: loggedAsPR };
+        }
+
+        function finalizeParsingSequence() {
             populateEventSelector();
             document.getElementById('dashboardSection').classList.remove('hidden');
             document.getElementById('scoreSection').classList.remove('hidden');
@@ -379,7 +506,7 @@
             let structuralKeys = Object.keys(parsedMeetDatabase).filter(key => parsedMeetDatabase[key].length > 0);
 
             if (structuralKeys.length === 0) {
-                alert(`No data entries found matching parameters.`);
+                alert(`No data entries found matching your specified school filters in this raw text.`);
                 return;
             }
 
@@ -473,20 +600,17 @@
             const schoolName = document.getElementById('schoolInput').value.trim().toUpperCase();
             const subtitle = document.getElementById('hashtagInput').value.trim();
 
-            // High impact jet black backdrop panel
             ctx.fillStyle = '#000000'; 
             ctx.fillRect(0, 0, 1080, 1080);
 
             ctx.fillStyle = '#fbbf24'; 
             ctx.fillRect(0, 0, 1080, 40);
 
-            // Clean crisp white top header text
             ctx.fillStyle = '#ffffff'; 
             ctx.font = '900 32px sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText(schoolName + " TRACK & FIELD", 540, 110);
 
-            // High contrast text outline layout at top
             ctx.font = '900 68px sans-serif';
             ctx.lineWidth = 14;
             ctx.strokeStyle = '#000000';
@@ -508,7 +632,6 @@
                 placements.forEach((runner, idx) => {
                     let rowY = startY + (idx * itemSpacing);
                     
-                    // Dark contrasting backing sheet panels
                     ctx.fillStyle = '#111111'; 
                     ctx.fillRect(140, rowY - 50, 800, 84);
                     
@@ -524,7 +647,6 @@
                     ctx.textAlign = 'left';
                     ctx.fillText(getOrdinalSuffix(runner.rank), 180, rowY + 6);
 
-                    // True white for high-legibility athlete rows
                     ctx.fillStyle = '#ffffff';
                     ctx.font = '900 38px sans-serif';
                     ctx.fillText(runner.athleteName, 310, rowY + 6);
@@ -543,18 +665,14 @@
 
             if (prList.length > 0) {
                 let prTopY = 820;
-                
                 ctx.fillStyle = '#111111'; 
                 ctx.fillRect(140, prTopY - 40, 800, 160);
-                
                 ctx.fillStyle = '#ef4444'; 
                 ctx.font = '900 24px sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillText("🔥 PERSONAL BEST ROSTERS", 170, prTopY);
-
                 ctx.fillStyle = '#e4e4e7';
                 ctx.font = 'bold 24px sans-serif';
-                
                 let namesText = prList.map(a => `${a.athleteName} (${a.mark})`).join(', ');
                 wrapCanvasText(ctx, namesText, 170, prTopY + 45, 740, 32);
             }
@@ -573,7 +691,6 @@
             let words = text.split(' ');
             let line = '';
             let initialY = y;
-
             for(let n = 0; n < words.length; n++) {
                 let testLine = line + words[n] + ' ';
                 let metrics = context.measureText(testLine);
@@ -582,8 +699,7 @@
                     context.fillText(line, x, y);
                     line = words[n] + ' ';
                     y += lineHeight;
-                }
-                else {
+                } else {
                     line = testLine;
                 }
             }
@@ -607,10 +723,9 @@
             const resultsUrl = document.getElementById('linkInput').value.trim();
 
             let post = `🏆 Final Meet Scores! 🐾\n\n`;
-            if (gScore) post += `runs Girls: ${gScore}\n`;
-            if (bScore) post += `runs Boys: ${bScore}\n`;
+            if (gScore) post += `Girls: ${gScore}\n`;
+            if (bScore) post += `Boys: ${bScore}\n`;
             if (!gScore && !bScore) post += `(Enter scores above to auto-compile layout)\n`;
-            
             if (resultsUrl) post += `\n📊 Full Data: ${resultsUrl}\n`;
             if (hashtag) post += (resultsUrl ? '' : '\n') + hashtag;
 
@@ -717,20 +832,17 @@
                 const bulkCanvas = document.getElementById('bulkWinnersCanvas');
                 const bulkCtx = bulkCanvas.getContext('2d');
 
-                // High impact jet black backdrop panel
                 bulkCtx.fillStyle = '#000000';
                 bulkCanvas.getContext('2d').fillRect(0, 0, 1080, 1080);
                 
                 bulkCtx.fillStyle = '#fbbf24'; 
                 bulkCtx.fillRect(0, 0, 1080, 40);
 
-                // Clean crisp white top header text
                 bulkCtx.fillStyle = '#ffffff'; 
                 bulkCtx.font = '900 32px sans-serif';
                 bulkCtx.textAlign = 'center';
                 bulkCtx.fillText(schoolName + " TRACK & FIELD", 540, 110);
 
-                // High contrast text outline layout at top
                 bulkCtx.font = '900 68px sans-serif';
                 bulkCtx.lineWidth = 14;
                 bulkCtx.strokeStyle = '#000000';
@@ -738,7 +850,6 @@
                 bulkCtx.fillStyle = '#fbbf24'; 
                 bulkCtx.fillText("MEET CHAMPIONS", 540, 195);
 
-                // Replaced "SLIDE X" with standard "PAGE X OF Y" formatting
                 bulkCtx.fillStyle = '#71717a';
                 bulkCtx.font = 'bold 24px sans-serif';
                 bulkCtx.fillText(`PAGE ${slideIndex + 1} OF ${slideGroups.length}`, 540, 240);
@@ -774,14 +885,12 @@
                     let calculatedTextHeight = 45 + (linesCounter * 32); 
                     let totalBoxHeight = calculatedTextHeight + (innerPadding * 2);
 
-                    // Dark contrasting backing sheet panels
                     bulkCtx.fillStyle = '#111111';
                     bulkCtx.fillRect(140, currentYPosition, 800, totalBoxHeight);
 
                     bulkCtx.fillStyle = '#fbbf24';
                     bulkCtx.fillRect(140, currentYPosition, 15, totalBoxHeight);
 
-                    // True white for high-legibility athlete row headers
                     bulkCtx.fillStyle = '#ffffff';
                     bulkCtx.font = '900 36px sans-serif';
                     bulkCtx.textAlign = 'left';
@@ -799,14 +908,7 @@
                     bulkCtx.font = 'bold 24px sans-serif';
                     bulkCtx.textAlign = 'left';
                     
-                    wrapCanvasText(
-                        bulkCtx, 
-                        eventsSubtext, 180, 
-                        currentYPosition + innerPadding + 70, 
-                        720, 
-                        32
-                    );
-
+                    wrapCanvasText(bulkCtx, eventsSubtext, 180, currentYPosition + innerPadding + 70, 720, 32);
                     currentYPosition += totalBoxHeight + 25;
                 });
 
