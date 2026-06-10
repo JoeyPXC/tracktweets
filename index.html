@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -256,7 +255,9 @@
             }
 
             // Detect Engine Source Identity
-            if (rawText.includes("PL") || rawText.includes("LN") || /^\s*\d+\s*$/m.test(rawText) && !rawText.includes("pts")) {
+            // Athletic.LIVE check must come FIRST — its metadata lines contain "+10pts" and "Start Lists"
+            // which would otherwise false-match the MileSplit detector.
+            if (rawText.includes("AthleticLIVE") || rawText.includes("Yr:") || /•\s*\+\d+pts/i.test(rawText) || /•\s*H\d+\s*•/i.test(rawText)) {
                 processAthleticLiveMobileData(rawText);
             } else if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top")) {
                 processMileSplitLiveData(rawText);
@@ -265,22 +266,28 @@
             }
         }
 
-        // NEW ENGINE: ATHLETIC.LIVE MOBILE STREAM PARSER
+        // ENGINE: ATHLETIC.LIVE PARSER
+        // Athletic.LIVE result blocks look like:
+        //   <rank>
+        //   <Athlete Name>
+        //   <Team Name>
+        //   <Time/Mark>
+        //   <Metadata: "New '26 OH #8 PB • +10pts • H1 • #1729 • Yr: 10">  (optional)
         function processAthleticLiveMobileData(rawText) {
             const targetSchool = document.getElementById('schoolInput').value.trim();
             parsedMeetDatabase = {};
-            
+
             const lines = rawText.replace(/\r\n/g, '\n').split('\n').map(l => l.trim()).filter(l => l.length > 0);
             const schoolRegex = new RegExp(targetSchool.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
 
             let currentGenderSection = "Boys";
             let currentEventName = "Unknown Event";
 
-            // Determine broad scope headers
-            for (let i = 0; i < Math.min(lines.length, 15); i++) {
+            // Scan headers to find event name and gender
+            for (let i = 0; i < Math.min(lines.length, 30); i++) {
                 if (/girls|womens/i.test(lines[i])) currentGenderSection = "Girls";
                 if (/boys|mens/i.test(lines[i])) currentGenderSection = "Boys";
-                if (/dash|hurdles|meters|relay|run|shot|discus|vault|jump/i.test(lines[i])) {
+                if (/\d+m|dash|hurdles|relay|run|shot|discus|vault|jump/i.test(lines[i]) && !/schedule|division|type|official/i.test(lines[i])) {
                     currentEventName = cleanEventTitle(lines[i], currentGenderSection);
                     break;
                 }
@@ -292,68 +299,46 @@
             while (i < lines.length) {
                 let line = lines[i];
 
-                // Catch sub-header event shifts within an ongoing copy-paste stream
-                if (/^(boys|girls)\s+/i.test(line) && /dash|hurdles|meters|relay|run|shot|discus|vault|jump/i.test(line)) {
-                    currentGenderSection = line.toLowerCase().includes("girls") ? "Girls" : "Boys";
+                // Catch event header shifts mid-paste (e.g. "Boys 400m Div 1 Finals")
+                if (/^(boys|girls)\s+/i.test(line) && /\d+m|dash|hurdles|relay|run|shot|discus|vault|jump/i.test(line)) {
+                    currentGenderSection = /girls/i.test(line) ? "Girls" : "Boys";
                     currentEventName = cleanEventTitle(line, currentGenderSection);
                     if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
                     i++;
                     continue;
                 }
 
-                // Check for individual rank line blocks
-                let rankMatch = line.match(/^(\d+)$/);
-                if (rankMatch) {
-                    let rank = parseInt(rankMatch[1]);
-                    let pointer = i + 1;
-                    let subBlock = [];
-
-                    // Gather lines up until the next digit boundary or event header shift
-                    while (pointer < lines.length) {
-                        if (/^\d+$/.test(lines[pointer])) break;
-                        if (/^(boys|girls)\s+/i.test(lines[pointer])) break;
-                        subBlock.push(lines[pointer]);
-                        pointer++;
+                // Rank line: a standalone integer
+                if (/^\d+$/.test(line)) {
+                    let rank = parseInt(line);
+                    let j = i + 1;
+                    // Collect lines until the next standalone rank number or event header
+                    let block = [];
+                    while (j < lines.length && !/^\d+$/.test(lines[j]) && !/^(boys|girls)\s+/i.test(lines[j])) {
+                        block.push(lines[j]);
+                        j++;
                     }
 
-                    // Clean the gathered block of technical elements
-                    let cleanBlock = subBlock.filter(l => !/^(PL|LN|H\d+|F\d+|FAT)$/i.test(l));
+                    // Athletic.LIVE block structure: [0]=name, [1]=team, [2]=time, [3]=metadata
+                    if (block.length >= 3) {
+                        let athleteName = block[0];
+                        let teamName    = block[1];
+                        let mark        = block[2].replace(/[^\d:.]/g, ''); // strip any non-time chars
+                        let metadata    = block[3] || '';
 
-                    if (cleanBlock.length >= 2) {
-                        let athleteName = cleanBlock[0];
-                        let mark = "";
-                        let teamName = "";
-                        let isPR = false;
+                        // PR/SB/PB lives in the metadata line (e.g. "New '26 OH #8 PB • +10pts")
+                        let isPR = /\bPB\b|\bPR\b|\bSB\b/i.test(metadata) || /\bPB\b|\bPR\b|\bSB\b/i.test(mark);
 
-                        // Identify performance metrics
-                        let markIndex = cleanBlock.findIndex(l => /[\d\.\:\-]/..test(l) && !l.includes(targetSchool));
-                        
-                        if (markIndex !== -1) {
-                            mark = cleanBlock[markIndex];
-                            // Team name typically brackets before or after marks in Athletic.LIVE structures
-                            teamName = cleanBlock.filter((_, idx) => idx !== 0 && idx !== markIndex).join(" ");
-                        } else {
-                            mark = cleanBlock[cleanBlock.length - 1];
-                            teamName = cleanBlock.slice(1, cleanBlock.length - 1).join(" ");
-                        }
-
-                        // Determine PR markers
-                        if (teamName.toUpperCase().includes("PR") || teamName.toUpperCase().includes("PB") || mark.toUpperCase().includes("PR")) {
-                            isPR = true;
-                            teamName = teamName.replace(/\b(PR|PB)\b/gi, "").trim();
-                            mark = mark.replace(/\b(PR|PB)\b/gi, "").trim();
-                        }
-
-                        if (schoolRegex.test(teamName) || schoolRegex.test(athleteName) || cleanBlock.some(l => schoolRegex.test(l))) {
+                        if (schoolRegex.test(teamName)) {
                             parsedMeetDatabase[currentEventName].push({
                                 rank: rank,
-                                athleteName: athleteName,
+                                athleteName: athleteName.trim(),
                                 mark: cleanPerformanceMark(stripWindReadings(mark)),
                                 isPR: isPR
                             });
                         }
                     }
-                    i = pointer;
+                    i = j;
                     continue;
                 }
                 i++;
