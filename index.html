@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Tweets Builder</title>
+    <title>Track Tweets & Grams Builder</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { -webkit-tap-highlight-color: transparent; }
@@ -18,9 +17,9 @@
         <!-- Header Section -->
         <header class="mb-5 text-center max-w-xl mx-auto">
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
-                ⚡ <span>TRACK TWEETS</span>
+                ⚡ <span>TRACK TWEETS & GRAMS</span>
             </h1>
-            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">High-density meet data formatted instantly for the 280-character limit.</p>
+            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">High-density meet data formatted instantly for social platforms.</p>
         </header>
 
         <!-- Main Workspace Grid (Stacked on mobile, 2-Columns on Desktops) -->
@@ -40,7 +39,7 @@
                                        class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-gray-400 mb-1">Hashtag</label>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Hashtag / Subtitle</label>
                                 <input type="text" id="hashtagInput" value="#GoPanthers" placeholder="e.g. #GoPanthers"  oninput="renderSocialPost(); updateScorePost();"
                                        class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white">
                             </div>
@@ -63,7 +62,7 @@
                     
                     <button onclick="processAthleticNetData()" 
                             class="w-full mt-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold py-3 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md">
-                        Build Tweet Lists 📊
+                        Build Social Lists 📊
                     </button>
                 </div>
 
@@ -139,34 +138,62 @@
                     </label>
                 </div>
 
-                <!-- Calculated Output Area -->
-                <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400">📱 Single Event Output</span>
-                        <span id="charCounter" class="text-xs font-mono px-2 py-0.5 bg-gray-900 rounded text-gray-400">0/280</span>
+                <!-- Combined Display Workspace (Text Output & Instagram Engine Side-by-Side/Stacked) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    
+                    <!-- Calculated Text Output Area -->
+                    <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-xs font-bold uppercase tracking-wider text-amber-400">📱 Single Event Text</span>
+                                <span id="charCounter" class="text-xs font-mono px-2 py-0.5 bg-gray-900 rounded text-gray-400">0/280</span>
+                            </div>
+                            <textarea id="outputPostText" rows="6" readonly 
+                                      class="w-full bg-gray-900 text-gray-100 p-3 rounded-lg text-xs font-mono border border-gray-700 focus:outline-none resize-none leading-relaxed sm:text-sm h-48"></textarea>
+                        </div>
+                        <button onclick="copyPostToClipboard('outputPostText', this)" 
+                                class="w-full mt-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider shadow-md">
+                            📋 Copy Event Text
+                        </button>
                     </div>
-                    
-                    <textarea id="outputPostText" rows="7" readonly 
-                              class="w-full bg-gray-900 text-gray-100 p-3 rounded-lg text-xs font-mono border border-gray-700 focus:outline-none resize-none leading-relaxed sm:text-sm lg:h-44"></textarea>
-                    
-                    <button onclick="copyPostToClipboard('outputPostText', this)" 
-                            class="w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md">
-                        📋 Copy Event Tweet
-                    </button>
+
+                    <!-- Instagram Graphic Engine Card -->
+                    <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg flex flex-col justify-between">
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-pink-400 block mb-2">📸 Instagram Post Preview</span>
+                            
+                            <!-- Hidden Master Render Engine Canvas -->
+                            <canvas id="instagramCanvas" width="1080" height="1080" class="hidden"></canvas>
+                            
+                            <!-- Visual Display Screen Element -->
+                            <div class="w-full aspect-square bg-gray-950 rounded-lg border border-gray-700 overflow-hidden relative shadow-inner max-w-[240px] mx-auto">
+                                <img id="instagramPreviewImage" class="w-full h-full object-contain" alt="Instagram graphic placeholder">
+                            </div>
+                        </div>
+                        
+                        <button onclick="downloadInstagramGraphic()" 
+                                class="w-full mt-3 bg-gradient-to-r from-pink-600 to-amber-500 hover:opacity-90 text-white font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider shadow-md">
+                            📸 Download Graphic (.PNG)
+                        </button>
+                    </div>
+
                 </div>
 
                 <!-- Bulk Team Winners Section -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
                     <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-2">🏆 All-Meet Team Winners</h2>
-                    <p class="text-[11px] text-gray-400 mb-3">Compiles every 1st place finisher from your team across the entire meet into optimized chunks.</p>
+                    <p class="text-[11px] text-gray-400 mb-3">Compiles every 1st place finisher from your team across the entire meet into optimized text chunks and grouped Instagram multi-slide images.</p>
                     
                     <button onclick="generateAllWinnersPosts()" 
                             class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-widest transition-all shadow-md">
-                        ⚡ Generate Winners Tweet(s)
+                        ⚡ Generate Winners Content & Graphics
                     </button>
 
-                    <!-- Responsive Multi-Column Chunk Grid on larger viewports -->
-                    <div id="bulkWinnersContainer" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 hidden">
+                    <!-- Hidden Render Canvas for Bulk Winners Images -->
+                    <canvas id="bulkWinnersCanvas" width="1080" height="1080" class="hidden"></canvas>
+
+                    <!-- Container for generated layouts (Both Text Chunks & IG Images populate here dynamically) -->
+                    <div id="bulkWinnersContainer" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
                         <!-- Dynamic multi-posts populate here -->
                     </div>
                 </div>
@@ -226,10 +253,10 @@
                 .replace(/\s*Wheelchair/gi, "")
                 .trim();
             
-            clean = clean.replace(/\s*[-\/]\s*\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?/gi, "");
+            clean = clean.replace(/\s*-\s*\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?/gi, "");
             clean = clean.replace(/\s+\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?$/gi, "");
             
-            clean = clean.replace(/\s*[-\/]\s*$/g, "").trim();
+            clean = clean.replace(/\s*-\s*$/g, "").trim();
             clean = clean.replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "");
             clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
 
@@ -436,6 +463,141 @@
             const counterEl = document.getElementById('charCounter');
             counterEl.innerText = `${post.trim().length}/280`;
             counterEl.className = post.trim().length > 280 ? "text-xs font-mono px-2 py-0.5 bg-red-950 rounded text-red-400 font-bold" : "text-xs font-mono px-2 py-0.5 bg-gray-900 rounded text-gray-400";
+            
+            drawInstagramCanvas(selectedEvent, platformPlacements, showPR ? prAthletes : []);
+        }
+
+        function drawInstagramCanvas(eventName, placements, prList) {
+            const canvas = document.getElementById('instagramCanvas');
+            const ctx = canvas.getContext('2d');
+            const schoolName = document.getElementById('schoolInput').value.trim().toUpperCase();
+            const subtitle = document.getElementById('hashtagInput').value.trim();
+
+            // High impact jet black backdrop panel
+            ctx.fillStyle = '#000000'; 
+            ctx.fillRect(0, 0, 1080, 1080);
+
+            ctx.fillStyle = '#fbbf24'; 
+            ctx.fillRect(0, 0, 1080, 40);
+
+            // Clean crisp white top header text
+            ctx.fillStyle = '#ffffff'; 
+            ctx.font = '900 32px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(schoolName + " TRACK & FIELD", 540, 110);
+
+            // High contrast text outline layout at top
+            ctx.font = '900 68px sans-serif';
+            ctx.lineWidth = 14;
+            ctx.strokeStyle = '#000000';
+            ctx.strokeText(eventName.toUpperCase(), 540, 200);
+            ctx.fillStyle = '#fbbf24'; 
+            ctx.fillText(eventName.toUpperCase(), 540, 200);
+
+            ctx.strokeStyle = '#222222'; 
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(140, 250);
+            ctx.lineTo(940, 250);
+            ctx.stroke();
+
+            let startY = 350;
+            let itemSpacing = 110;
+
+            if (placements.length > 0) {
+                placements.forEach((runner, idx) => {
+                    let rowY = startY + (idx * itemSpacing);
+                    
+                    // Dark contrasting backing sheet panels
+                    ctx.fillStyle = '#111111'; 
+                    ctx.fillRect(140, rowY - 50, 800, 84);
+                    
+                    if (runner.rank === 1) ctx.fillStyle = '#fbbf24'; 
+                    else if (runner.rank === 2) ctx.fillStyle = '#e2e8f0'; 
+                    else if (runner.rank === 3) ctx.fillStyle = '#d97706'; 
+                    else ctx.fillStyle = '#06b6d4'; 
+                    
+                    ctx.fillRect(140, rowY - 50, 15, 84);
+
+                    ctx.fillStyle = '#a1a1aa'; 
+                    ctx.font = 'bold 36px sans-serif';
+                    ctx.textAlign = 'left';
+                    ctx.fillText(getOrdinalSuffix(runner.rank), 180, rowY + 6);
+
+                    // True white for high-legibility athlete rows
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = '900 38px sans-serif';
+                    ctx.fillText(runner.athleteName, 310, rowY + 6);
+
+                    ctx.fillStyle = '#fbbf24'; 
+                    ctx.font = 'bold 40px monospace';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(runner.mark, 910, rowY + 6);
+                });
+            } else {
+                ctx.fillStyle = '#71717a';
+                ctx.font = 'italic 36px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`No qualifying team scores inside Top ${currentPlacementCap}`, 540, startY + 50);
+            }
+
+            if (prList.length > 0) {
+                let prTopY = 820;
+                
+                ctx.fillStyle = '#111111'; 
+                ctx.fillRect(140, prTopY - 40, 800, 160);
+                
+                ctx.fillStyle = '#ef4444'; 
+                ctx.font = '900 24px sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText("🔥 PERSONAL BEST ROSTERS", 170, prTopY);
+
+                ctx.fillStyle = '#e4e4e7';
+                ctx.font = 'bold 24px sans-serif';
+                
+                let namesText = prList.map(a => `${a.athleteName} (${a.mark})`).join(', ');
+                wrapCanvasText(ctx, namesText, 170, prTopY + 45, 740, 32);
+            }
+
+            if(subtitle) {
+                ctx.fillStyle = '#a1a1aa';
+                ctx.font = 'bold 28px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(subtitle, 540, 1030);
+            }
+
+            document.getElementById('instagramPreviewImage').src = canvas.toDataURL('image/png');
+        }
+
+        function wrapCanvasText(context, text, x, y, maxWidth, lineHeight) {
+            let words = text.split(' ');
+            let line = '';
+            let initialY = y;
+
+            for(let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = context.measureText(testLine);
+                let testWidth = metrics.width;
+                if (testWidth > maxWidth && n > 0) {
+                    context.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                }
+                else {
+                    line = testLine;
+                }
+            }
+            context.fillText(line, x, y);
+            return y - initialY + lineHeight;
+        }
+
+        function downloadInstagramGraphic() {
+            const selectedEvent = document.getElementById('eventSelector').value || "event";
+            const canvas = document.getElementById('instagramCanvas');
+            const link = document.createElement('a');
+            link.download = `IG_${selectedEvent.replace(/\s+/g, '_')}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
         }
 
         function updateScorePost() {
@@ -445,8 +607,8 @@
             const resultsUrl = document.getElementById('linkInput').value.trim();
 
             let post = `🏆 Final Meet Scores! 🐾\n\n`;
-            if (gScore) post += `🏃‍♀️ Girls: ${gScore}\n`;
-            if (bScore) post += `🏃‍♂️ Boys: ${bScore}\n`;
+            if (gScore) post += `runs Girls: ${gScore}\n`;
+            if (bScore) post += `runs Boys: ${bScore}\n`;
             if (!gScore && !bScore) post += `(Enter scores above to auto-compile layout)\n`;
             
             if (resultsUrl) post += `\n📊 Full Data: ${resultsUrl}\n`;
@@ -456,30 +618,55 @@
             const cnt = document.getElementById('scoreCharCounter');
             cnt.innerText = `${post.trim().length}/280`;
             cnt.className = post.trim().length > 280 ? "absolute right-2 top-2 text-[10px] bg-red-950 px-1 rounded text-red-400 font-bold" : "absolute right-2 top-2 text-[10px] bg-gray-950 px-1 rounded text-gray-500 font-mono";
+            
+            const selectedEvent = document.getElementById('eventSelector').value;
+            if(selectedEvent) {
+                const datasets = parsedMeetDatabase[selectedEvent] || [];
+                const platformPlacements = datasets.filter(item => item.rank <= currentPlacementCap);
+                const prAthletes = datasets.filter(item => item.isPR);
+                drawInstagramCanvas(selectedEvent, platformPlacements, document.getElementById('togglePR').checked ? prAthletes : []);
+            }
         }
 
         function generateAllWinnersPosts() {
             const hashtag = document.getElementById('hashtagInput').value.trim();
             const resultsUrl = document.getElementById('linkInput').value.trim();
+            const schoolName = document.getElementById('schoolInput').value.trim().toUpperCase();
             const container = document.getElementById('bulkWinnersContainer');
+            
             container.innerHTML = "";
             container.classList.remove('hidden');
 
-            let allWinners = [];
+            let rawWinners = [];
             let sortedEventNames = Array.from(document.getElementById('eventSelector').options).map(o => o.value);
 
             sortedEventNames.forEach(eventName => {
                 let items = parsedMeetDatabase[eventName] || [];
                 let winners = items.filter(a => a.rank === 1);
                 winners.forEach(w => {
-                    allWinners.push({ event: eventName, name: w.athleteName, mark: w.mark });
+                    rawWinners.push({ event: eventName, name: w.athleteName, mark: w.mark });
                 });
             });
 
-            if(allWinners.length === 0) {
+            if(rawWinners.length === 0) {
                 container.innerHTML = `<div class="col-span-1 sm:col-span-2 text-xs text-amber-500 bg-gray-900 p-3 rounded-lg border border-gray-700 text-center">No 1st place finishers found in parsed results data.</div>`;
                 return;
             }
+
+            let groupedWinnersMap = {};
+            rawWinners.forEach(w => {
+                let shortEvent = w.event.replace("Girls ", "").replace("Boys ", "");
+                if (!groupedWinnersMap[w.name]) {
+                    groupedWinnersMap[w.name] = {
+                        fullName: w.name,
+                        gender: w.event.startsWith("Girls") ? "Girls" : "Boys",
+                        eventsList: []
+                    };
+                }
+                groupedWinnersMap[w.name].eventsList.push(`${shortEvent} (${w.mark})`);
+            });
+
+            let consolidatedWinners = Object.values(groupedWinnersMap);
 
             let postDrafts = [];
             let baseHeader = `🏆 Meet Champions!`;
@@ -488,9 +675,8 @@
             if (hashtag) footer += `\n${hashtag}`;
             
             let currentBody = "";
-            
-            allWinners.forEach((w) => {
-                let entryLine = `• ${w.event}: ${w.name} - ${w.mark}\n`;
+            consolidatedWinners.forEach((w) => {
+                let entryLine = `• ${w.fullName} (${w.gender}) - ${w.eventsList.join(', ')}\n`;
                 let layoutTest = `${baseHeader} (9/9) 🐾\n\n🥇 1st Place Finishes:\n${currentBody}${entryLine}${footer}`;
                 
                 if (layoutTest.trim().length > 280 && currentBody !== "") {
@@ -504,23 +690,159 @@
 
             postDrafts.forEach((bodyText, index) => {
                 let finalString = `🏆 Meet Champions! (${index + 1}/${postDrafts.length}) 🐾\n\n🥇 1st Place Finishes:\n${bodyText}${footer}`;
+                let areaId = `winner_post_${index}`;
                 
                 let wrapper = document.createElement('div');
-                wrapper.className = "bg-gray-900 p-3 rounded-lg border border-gray-700 space-y-2 relative flex flex-col justify-between";
-                
-                let areaId = `winner_post_${index}`;
+                wrapper.className = "bg-gray-900 p-3 rounded-lg border border-gray-700 space-y-2 flex flex-col justify-between";
                 wrapper.innerHTML = `
                     <div>
                         <div class="flex justify-between items-center text-[10px] text-gray-500 font-mono mb-1">
-                            <span>CHUNK CHANNELS ${index + 1} OF ${postDrafts.length}</span>
+                            <span>TEXT CHUNK ${index + 1} OF ${postDrafts.length}</span>
                             <span class="bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded">${finalString.trim().length}/280 Chars</span>
                         </div>
-                        <textarea id="${areaId}" readonly class="w-full bg-gray-950 p-2 text-xs font-mono text-gray-200 rounded border border-gray-800 h-32 focus:outline-none resize-none leading-relaxed">${finalString.trim()}</textarea>
+                        <textarea id="${areaId}" readonly class="w-full bg-gray-950 p-2 text-xs font-mono text-gray-200 rounded border border-gray-800 h-36 focus:outline-none resize-none leading-relaxed">${finalString.trim()}</textarea>
                     </div>
-                    <button onclick="copyPostToClipboard('${areaId}', this)" class="w-full mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-[11px] font-bold py-2 rounded transition-all uppercase tracking-wider">📋 Copy Chunk</button>
+                    <button onclick="copyPostToClipboard('${areaId}', this)" class="w-full mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-[11px] font-bold py-2 rounded transition-all uppercase tracking-wider">📋 Copy Text Chunk</button>
                 `;
                 container.appendChild(wrapper);
             });
+
+            const maxRowsPerSlide = 4;
+            let slideGroups = [];
+            for (let i = 0; i < consolidatedWinners.length; i += maxRowsPerSlide) {
+                slideGroups.push(consolidatedWinners.slice(i, i + maxRowsPerSlide));
+            }
+
+            slideGroups.forEach((athletesInSlide, slideIndex) => {
+                const bulkCanvas = document.getElementById('bulkWinnersCanvas');
+                const bulkCtx = bulkCanvas.getContext('2d');
+
+                // High impact jet black backdrop panel
+                bulkCtx.fillStyle = '#000000';
+                bulkCanvas.getContext('2d').fillRect(0, 0, 1080, 1080);
+                
+                bulkCtx.fillStyle = '#fbbf24'; 
+                bulkCtx.fillRect(0, 0, 1080, 40);
+
+                // Clean crisp white top header text
+                bulkCtx.fillStyle = '#ffffff'; 
+                bulkCtx.font = '900 32px sans-serif';
+                bulkCtx.textAlign = 'center';
+                bulkCtx.fillText(schoolName + " TRACK & FIELD", 540, 110);
+
+                // High contrast text outline layout at top
+                bulkCtx.font = '900 68px sans-serif';
+                bulkCtx.lineWidth = 14;
+                bulkCtx.strokeStyle = '#000000';
+                bulkCtx.strokeText("MEET CHAMPIONS", 540, 195);
+                bulkCtx.fillStyle = '#fbbf24'; 
+                bulkCtx.fillText("MEET CHAMPIONS", 540, 195);
+
+                // Replaced "SLIDE X" with standard "PAGE X OF Y" formatting
+                bulkCtx.fillStyle = '#71717a';
+                bulkCtx.font = 'bold 24px sans-serif';
+                bulkCtx.fillText(`PAGE ${slideIndex + 1} OF ${slideGroups.length}`, 540, 240);
+
+                bulkCtx.strokeStyle = '#222222'; 
+                bulkCtx.lineWidth = 4;
+                bulkCtx.beginPath();
+                bulkCtx.moveTo(140, 270);
+                bulkCtx.lineTo(940, 270);
+                bulkCtx.stroke();
+
+                let currentYPosition = 330;
+                const innerPadding = 30;
+
+                athletesInSlide.forEach((athlete) => {
+                    bulkCtx.font = 'bold 24px sans-serif';
+                    let eventsSubtext = `🏆 1st Place: ${athlete.eventsList.join(', ')}`;
+                    
+                    let words = eventsSubtext.split(' ');
+                    let currentTestingLine = '';
+                    let linesCounter = 1;
+                    
+                    for (let n = 0; n < words.length; n++) {
+                        let testLine = currentTestingLine + words[n] + ' ';
+                        if (bulkCtx.measureText(testLine).width > 720 && n > 0) {
+                            linesCounter++;
+                            currentTestingLine = words[n] + ' ';
+                        } else {
+                            currentTestingLine = testLine;
+                        }
+                    }
+
+                    let calculatedTextHeight = 45 + (linesCounter * 32); 
+                    let totalBoxHeight = calculatedTextHeight + (innerPadding * 2);
+
+                    // Dark contrasting backing sheet panels
+                    bulkCtx.fillStyle = '#111111';
+                    bulkCtx.fillRect(140, currentYPosition, 800, totalBoxHeight);
+
+                    bulkCtx.fillStyle = '#fbbf24';
+                    bulkCtx.fillRect(140, currentYPosition, 15, totalBoxHeight);
+
+                    // True white for high-legibility athlete row headers
+                    bulkCtx.fillStyle = '#ffffff';
+                    bulkCtx.font = '900 36px sans-serif';
+                    bulkCtx.textAlign = 'left';
+                    bulkCtx.fillText(athlete.fullName.toUpperCase(), 180, currentYPosition + innerPadding + 24);
+
+                    bulkCtx.fillStyle = '#222222';
+                    bulkCtx.fillRect(820, currentYPosition + innerPadding, 95, 45);
+                    
+                    bulkCtx.fillStyle = '#a1a1aa';
+                    bulkCtx.font = 'bold 20px sans-serif';
+                    bulkCtx.textAlign = 'center';
+                    bulkCtx.fillText(athlete.gender.toUpperCase(), 867, currentYPosition + innerPadding + 30);
+
+                    bulkCtx.fillStyle = '#a1a1aa';
+                    bulkCtx.font = 'bold 24px sans-serif';
+                    bulkCtx.textAlign = 'left';
+                    
+                    wrapCanvasText(
+                        bulkCtx, 
+                        eventsSubtext, 180, 
+                        currentYPosition + innerPadding + 70, 
+                        720, 
+                        32
+                    );
+
+                    currentYPosition += totalBoxHeight + 25;
+                });
+
+                if(hashtag) {
+                    bulkCtx.fillStyle = '#71717a';
+                    bulkCtx.font = 'bold 28px sans-serif';
+                    bulkCtx.textAlign = 'center';
+                    bulkCtx.fillText(hashtag, 540, 1040);
+                }
+
+                let slideDataUrl = bulkCanvas.toDataURL('image/png');
+
+                let graphicCardWrapper = document.createElement('div');
+                graphicCardWrapper.className = "bg-gray-900 p-3 rounded-xl border border-gray-700 flex flex-col justify-between items-center text-center space-y-3 shadow-md";
+                
+                let uniqueImgId = `bulk_img_frame_${slideIndex}`;
+                graphicCardWrapper.innerHTML = `
+                    <div class="w-full">
+                        <span class="text-[10px] font-mono text-pink-400 block mb-1 uppercase tracking-wider">📸 WINNERS GRAPHIC PAGE ${slideIndex + 1}</span>
+                        <div class="w-full aspect-square bg-gray-950 rounded-lg border border-gray-800 overflow-hidden shadow-inner max-w-[180px] mx-auto">
+                            <img id="${uniqueImgId}" src="${slideDataUrl}" class="w-full h-full object-contain" alt="Winners page preview">
+                        </div>
+                    </div>
+                    <button onclick="downloadDirectBulkSlide('${slideDataUrl}', ${slideIndex + 1})" class="w-full bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2 rounded text-xs uppercase tracking-wider transition-all">
+                        📥 Download Page ${slideIndex + 1}
+                    </button>
+                `;
+                container.appendChild(graphicCardWrapper);
+            });
+        }
+
+        function downloadDirectBulkSlide(dataUrlString, indexNum) {
+            const link = document.createElement('a');
+            link.download = `IG_Meet_Champions_Page_${indexNum}.png`;
+            link.href = dataUrlString;
+            link.click();
         }
 
         function copyPostToClipboard(elementId, buttonEl) {
@@ -535,7 +857,7 @@
             setTimeout(() => {
                 buttonEl.innerText = baseLabel;
                 if(elementId === 'outputPostText') {
-                    buttonEl.className = "w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md";
+                    buttonEl.className = "w-full mt-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider shadow-md";
                 } else if(elementId === 'outputScoreText') {
                     buttonEl.className = "w-full mt-2 bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-bold py-2 rounded uppercase tracking-wider shadow-sm";
                 } else {
