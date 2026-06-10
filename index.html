@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,10 +12,8 @@
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased p-3 sm:p-6 lg:p-8">
 
-    <!-- Responsive Main Fluid Container -->
     <div class="max-w-7xl mx-auto">
         
-        <!-- Header Section -->
         <header class="mb-5 text-center max-w-xl mx-auto">
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
                 ⚡ <span>TRACK TWEETS & GRAMS</span>
@@ -22,10 +21,9 @@
             <p class="text-xs sm:text-sm text-gray-400 mt-0.5">High-density meet data formatted instantly for social platforms.</p>
         </header>
 
-        <!-- Main Workspace Grid (Stacked on mobile, 2-Columns on Desktops) -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
             
-            <!-- Left Side Control Panel (Inputs & Configuration) -->
+            <!-- Left Side Control Panel -->
             <div class="lg:col-span-5 space-y-4">
                 
                 <!-- Step 1: Configuration -->
@@ -46,7 +44,7 @@
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-400 mb-1">Live Results URL <span class="text-[10px] text-gray-500 font-normal">(Optional)</span></label>
-                            <input type="text" id="linkInput" oninput="renderSocialPost(); updateScorePost();" placeholder="e.g. milesplit.live/meets/..." 
+                            <input type="text" id="linkInput" oninput="renderSocialPost(); updateScorePost();" placeholder="e.g. live.athletic.net/meets/..." 
                                    class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600">
                         </div>
                     </div>
@@ -56,7 +54,7 @@
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
                     <div class="flex justify-between items-center mb-2">
                         <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400">2. Paste Raw Meet Data</h2>
-                        <span class="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded font-semibold border border-gray-700">Supports Athletic.net & MileSplit Live</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded font-semibold border border-gray-700">Supports Athletic.LIVE & MileSplit</span>
                     </div>
                     <textarea id="rawResults" rows="5" 
                               placeholder="Copy from browser and paste here... (Works directly from mobile browsers!)" 
@@ -97,7 +95,7 @@
 
             </div>
 
-            <!-- Right Side Dashboard (Output Generators & Selectors) -->
+            <!-- Right Side Dashboard -->
             <div id="dashboardSection" class="hidden lg:col-span-7 space-y-4">
                 
                 <!-- Step 3: Interactive Event Config -->
@@ -105,7 +103,6 @@
                     <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400">3. Select Event & Settings</h2>
                     
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <!-- Schedule Order Gender Toggle -->
                         <div>
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Schedule Priority Order</label>
                             <div class="grid grid-cols-2 gap-2 bg-gray-900 p-1 rounded-lg border border-gray-700">
@@ -114,7 +111,6 @@
                             </div>
                         </div>
 
-                        <!-- Meet Bracket Type Toggle -->
                         <div>
                             <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Placement Filter Range</label>
                             <div class="grid grid-cols-2 gap-2 bg-gray-900 p-1 rounded-lg border border-gray-700">
@@ -131,7 +127,6 @@
                         </select>
                     </div>
 
-                    <!-- Dynamic PR Toggle Switch -->
                     <label class="flex items-center justify-between p-2 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer select-none">
                         <span class="text-xs font-semibold text-gray-300">Include PR Roster at bottom</span>
                         <div class="relative">
@@ -141,10 +136,9 @@
                     </label>
                 </div>
 
-                <!-- Combined Display Workspace (Text Output & Instagram Engine Side-by-Side/Stacked) -->
+                <!-- Combined Display Workspace -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
-                    <!-- Calculated Text Output Area -->
                     <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg flex flex-col justify-between">
                         <div>
                             <div class="flex justify-between items-center mb-2">
@@ -160,20 +154,14 @@
                         </button>
                     </div>
 
-                    <!-- Instagram Graphic Engine Card -->
                     <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg flex flex-col justify-between">
                         <div>
                             <span class="text-xs font-bold uppercase tracking-wider text-pink-400 block mb-2">📸 Instagram Post Preview</span>
-                            
-                            <!-- Hidden Master Render Engine Canvas -->
                             <canvas id="instagramCanvas" width="1080" height="1080" class="hidden"></canvas>
-                            
-                            <!-- Visual Display Screen Element -->
                             <div class="w-full aspect-square bg-gray-950 rounded-lg border border-gray-700 overflow-hidden relative shadow-inner max-w-[240px] mx-auto">
                                 <img id="instagramPreviewImage" class="w-full h-full object-contain" alt="Instagram graphic placeholder">
                             </div>
                         </div>
-                        
                         <button onclick="downloadInstagramGraphic()" 
                                 class="w-full mt-3 bg-gradient-to-r from-pink-600 to-amber-500 hover:opacity-90 text-white font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider shadow-md">
                             📸 Download Graphic (.PNG)
@@ -185,27 +173,20 @@
                 <!-- Bulk Team Winners Section -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
                     <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-2">🏆 All-Meet Team Winners</h2>
-                    <p class="text-[11px] text-gray-400 mb-3">Compiles every 1st place finisher from your team across the entire meet into optimized text chunks and grouped Instagram multi-slide images.</p>
-                    
+                    <p class="text-[11px] text-gray-400 mb-3">Compiles every 1st place finisher from your team across the entire meet.</p>
                     <button onclick="generateAllWinnersPosts()" 
                             class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-widest transition-all shadow-md">
                         ⚡ Generate Winners Content & Graphics
                     </button>
-
-                    <!-- Hidden Render Canvas for Bulk Winners Images -->
                     <canvas id="bulkWinnersCanvas" width="1080" height="1080" class="hidden"></canvas>
-
-                    <!-- Container for generated layouts (Both Text Chunks & IG Images populate here dynamically) -->
-                    <div id="bulkWinnersContainer" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 hidden">
-                        <!-- Dynamic multi-posts populate here -->
-                    </div>
+                    <div id="bulkWinnersContainer" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 hidden"></div>
                 </div>
 
             </div>
         </div>
     </div>
 
-    <!-- Logic Engine Core -->
+    <!-- Core Parsing Logic Engine -->
     <script>
         let parsedMeetDatabase = {};
         let currentPlacementCap = 3; 
@@ -213,16 +194,10 @@
 
         function cleanPerformanceMark(markStr) {
             if(!markStr) return "";
-            // Clean fat timing tags
             let clean = markStr.replace(/(\d+(\.\d+)?)\s*[aAhH]+\b/g, '$1');
             clean = clean.replace(/(\d+)\s*[aA]$/g, '$1');
-            
-            if (clean.includes("(")) {
-                clean = clean.split("(")[0].trim();
-            }
-            if (clean.includes("'")) {
-                clean = clean.replace(/\s+/g, '').replace(/"/g, '').replace(/'/g, '-');
-            }
+            if (clean.includes("(")) clean = clean.split("(")[0].trim();
+            if (clean.includes("'")) clean = clean.replace(/\s+/g, '').replace(/"/g, '').replace(/'/g, '-');
             return clean.trim();
         }
 
@@ -246,7 +221,6 @@
 
         function cleanEventTitle(rawTitle, genderSection) {
             let isWheelchair = rawTitle.toLowerCase().includes("wheelchair") || rawTitle.toLowerCase().includes("wc");
-            
             let clean = rawTitle
                 .replace(/\s*Varsity\s*-\s*Finals/gi, "")
                 .replace(/\s*Wheelchair\s*-\s*Finals/gi, "")
@@ -255,28 +229,21 @@
                 .replace(/\s*Varsity/gi, "")
                 .replace(/\s*Wheelchair/gi, "")
                 .trim();
-            
             clean = clean.replace(/\s*-\s*\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?/gi, "");
             clean = clean.replace(/\s+\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?$/gi, "");
-            
             clean = clean.replace(/\s*-\s*$/g, "").trim();
             clean = clean.replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "");
             clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
             clean = clean.replace(/(\d+)\s*meter\s+Dash/gi, "$1m Dash");
-
             clean = clean.replace(/4x100\s*Relay/i, "4x100 Relay");
             clean = clean.replace(/4x200\s*Relay/i, "4x200 Relay");
             clean = clean.replace(/4x400\s*Relay/i, "4x400 Relay");
             clean = clean.replace(/4x800\s*Relay/i, "4x800 Relay");
 
             let baseTitle = `${genderSection} ${clean}`.replace(/\s+/g, ' ').trim();
-            
             if (isWheelchair) {
-                baseTitle = baseTitle.replace(/\s+Relay/i, "");
-                baseTitle = baseTitle.replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "");
-                baseTitle += " WC";
+                baseTitle = baseTitle.replace(/\s+Relay/i, "").replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "") + " WC";
             }
-            
             return baseTitle;
         }
 
@@ -289,25 +256,121 @@
             }
 
             // Detect Engine Source Identity
-            if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top")) {
+            if (rawText.includes("PL") || rawText.includes("LN") || /^\s*\d+\s*$/m.test(rawText) && !rawText.includes("pts")) {
+                processAthleticLiveMobileData(rawText);
+            } else if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top")) {
                 processMileSplitLiveData(rawText);
             } else {
-                processAthleticNetData(rawText);
+                processAthleticNetDesktopData(rawText);
             }
         }
 
-        // NEW PARSING ENGINE: MILESPLIT LIVE
-        function processMileSplitLiveData(rawText) {
+        // NEW ENGINE: ATHLETIC.LIVE MOBILE STREAM PARSER
+        function processAthleticLiveMobileData(rawText) {
             const targetSchool = document.getElementById('schoolInput').value.trim();
             parsedMeetDatabase = {};
-
-            const normalizedText = rawText.replace(/\r\n/g, '\n');
-            const lines = normalizedText.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            
+            const lines = rawText.replace(/\r\n/g, '\n').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const schoolRegex = new RegExp(targetSchool.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
 
             let currentGenderSection = "Boys";
             let currentEventName = "Unknown Event";
 
-            // Attempt Header Scraping detection inside MileSplit Stream
+            // Determine broad scope headers
+            for (let i = 0; i < Math.min(lines.length, 15); i++) {
+                if (/girls|womens/i.test(lines[i])) currentGenderSection = "Girls";
+                if (/boys|mens/i.test(lines[i])) currentGenderSection = "Boys";
+                if (/dash|hurdles|meters|relay|run|shot|discus|vault|jump/i.test(lines[i])) {
+                    currentEventName = cleanEventTitle(lines[i], currentGenderSection);
+                    break;
+                }
+            }
+
+            if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
+
+            let i = 0;
+            while (i < lines.length) {
+                let line = lines[i];
+
+                // Catch sub-header event shifts within an ongoing copy-paste stream
+                if (/^(boys|girls)\s+/i.test(line) && /dash|hurdles|meters|relay|run|shot|discus|vault|jump/i.test(line)) {
+                    currentGenderSection = line.toLowerCase().includes("girls") ? "Girls" : "Boys";
+                    currentEventName = cleanEventTitle(line, currentGenderSection);
+                    if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
+                    i++;
+                    continue;
+                }
+
+                // Check for individual rank line blocks
+                let rankMatch = line.match(/^(\d+)$/);
+                if (rankMatch) {
+                    let rank = parseInt(rankMatch[1]);
+                    let pointer = i + 1;
+                    let subBlock = [];
+
+                    // Gather lines up until the next digit boundary or event header shift
+                    while (pointer < lines.length) {
+                        if (/^\d+$/.test(lines[pointer])) break;
+                        if (/^(boys|girls)\s+/i.test(lines[pointer])) break;
+                        subBlock.push(lines[pointer]);
+                        pointer++;
+                    }
+
+                    // Clean the gathered block of technical elements
+                    let cleanBlock = subBlock.filter(l => !/^(PL|LN|H\d+|F\d+|FAT)$/i.test(l));
+
+                    if (cleanBlock.length >= 2) {
+                        let athleteName = cleanBlock[0];
+                        let mark = "";
+                        let teamName = "";
+                        let isPR = false;
+
+                        // Identify performance metrics
+                        let markIndex = cleanBlock.findIndex(l => /[\d\.\:\-]/..test(l) && !l.includes(targetSchool));
+                        
+                        if (markIndex !== -1) {
+                            mark = cleanBlock[markIndex];
+                            // Team name typically brackets before or after marks in Athletic.LIVE structures
+                            teamName = cleanBlock.filter((_, idx) => idx !== 0 && idx !== markIndex).join(" ");
+                        } else {
+                            mark = cleanBlock[cleanBlock.length - 1];
+                            teamName = cleanBlock.slice(1, cleanBlock.length - 1).join(" ");
+                        }
+
+                        // Determine PR markers
+                        if (teamName.toUpperCase().includes("PR") || teamName.toUpperCase().includes("PB") || mark.toUpperCase().includes("PR")) {
+                            isPR = true;
+                            teamName = teamName.replace(/\b(PR|PB)\b/gi, "").trim();
+                            mark = mark.replace(/\b(PR|PB)\b/gi, "").trim();
+                        }
+
+                        if (schoolRegex.test(teamName) || schoolRegex.test(athleteName) || cleanBlock.some(l => schoolRegex.test(l))) {
+                            parsedMeetDatabase[currentEventName].push({
+                                rank: rank,
+                                athleteName: athleteName,
+                                mark: cleanPerformanceMark(stripWindReadings(mark)),
+                                isPR: isPR
+                            });
+                        }
+                    }
+                    i = pointer;
+                    continue;
+                }
+                i++;
+            }
+
+            finalizeParsingSequence();
+        }
+
+        // PARSING ENGINE: MILESPLIT LIVE
+        function processMileSplitLiveData(rawText) {
+            const targetSchool = document.getElementById('schoolInput').value.trim();
+            parsedMeetDatabase = {};
+            const lines = rawText.replace(/\r\n/g, '\n').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+
+            let currentGenderSection = "Boys";
+            let currentEventName = "Unknown Event";
+
             for(let i=0; i<Math.min(lines.length, 12); i++){
                 let headerLine = lines[i];
                 if(/Girls|Womens/i.test(headerLine)) currentGenderSection = "Girls";
@@ -318,53 +381,36 @@
                 }
             }
 
-            if (!parsedMeetDatabase[currentEventName]) {
-                parsedMeetDatabase[currentEventName] = [];
-            }
-
+            if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
             const schoolRegex = new RegExp(targetSchool.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
-            
-            let trackingPlace = 0;
 
             for (let i = 0; i < lines.length; i++) {
                 let line = lines[i];
 
-                // Detect shifting header structures on mobile copy streams
                 if (/\b(Boys|Girls)\s+\d+/i.test(line) || (/\b(Boys|Girls)\s+\w+\s+(Dash|Run|Hurdles|Relay)/i.test(line))) {
                     let inferredGender = line.toLowerCase().includes("girls") ? "Girls" : "Boys";
                     currentEventName = cleanEventTitle(line, inferredGender);
                     if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
-                    trackingPlace = 0; // Reset tracking scope context
                     continue;
                 }
 
-                // Identify structural Row Start Sequences inside MileSplit data blocks
                 let placeMatch = line.match(/^(\d+)\s*$/);
                 if (placeMatch) {
                     let extractedPlace = parseInt(placeMatch[1]);
-                    
-                    // Look forward to extract block values safely across variable line counts
                     let pointer = i + 1;
                     let blockLines = [];
                     while(pointer < lines.length && blockLines.length < 8) {
-                        if (/^\d+\s*$/.test(lines[pointer])) break; // Found next runner index row
-                        if (/\b(Boys|Girls)\b/i.test(lines[pointer]) && pointer > i + 3) break; // Event boundary check
+                        if (/^\d+\s*$/.test(lines[pointer])) break;
+                        if (/\b(Boys|Girls)\b/i.test(lines[pointer]) && pointer > i + 3) break;
                         blockLines.push(lines[pointer]);
                         pointer++;
                     }
 
-                    // Pack blocks down into flattened parsing scopes
                     let completeBlockString = blockLines.join(" ");
-                    
-                    // Strip arbitrary layout decorations
-                    completeBlockString = completeBlockString.replace(/\d+\s*pts\s*/gi, "");
-                    completeBlockString = completeBlockString.replace(/OH\s+Top\s+\d+/gi, "");
-                    completeBlockString = completeBlockString.replace(/\s*\*\s*/g, ""); // Remove record asterisks
+                    completeBlockString = completeBlockString.replace(/\d+\s*pts\s*/gi, "").replace(/OH\s+Top\s+\d+/gi, "").replace(/\s*\*\s*/g, "");
 
                     if (schoolRegex.test(completeBlockString)) {
-                        // Extract structural elements using spatial layout markers
                         let parts = completeBlockString.split(/\s+/);
-                        
                         let yearIndex = parts.findIndex(p => /^(10|11|12|9|8|7)$/.test(p));
                         let athleteName = "";
                         let teamName = "";
@@ -373,19 +419,15 @@
 
                         if (yearIndex !== -1) {
                             athleteName = parts.slice(0, yearIndex).join(" ");
-                            
-                            // Re-anchor search vectors at tail ends for performance times
                             let timeIndex = parts.findIndex((p, idx) => idx > yearIndex && /^\d{1,2}\.\d{2}$/.test(p));
                             if (timeIndex !== -1) {
                                 teamName = parts.slice(yearIndex + 1, timeIndex).join(" ");
                                 mark = parts[timeIndex];
                             } else {
-                                // Field events fallback logic
                                 teamName = parts.slice(yearIndex + 1, parts.length - 1).join(" ");
                                 mark = parts[parts.length - 1];
                             }
                         } else {
-                            // Backup row split parameters if Year layout block is omitted
                             athleteName = parts.slice(0, 2).join(" ");
                             mark = parts[parts.length - 1];
                             teamName = parts.slice(2, parts.length - 1).join(" ");
@@ -398,15 +440,14 @@
                             isPR: isPR
                         });
                     }
-                    i = pointer - 1; // Advance pointer stream past processed data block
+                    i = pointer - 1;
                 }
             }
-
             finalizeParsingSequence();
         }
 
-        // ORIGINAL ATHLETIC.NET PARSING ENGINE
-        function processAthleticNetData(rawText) {
+        // PARSING ENGINE: ATHLETIC.NET DESKTOP ARCHIVE
+        function processAthleticNetDesktopData(rawText) {
             const targetSchool = document.getElementById('schoolInput').value.trim();
             parsedMeetDatabase = {};
             const lines = rawText.split('\n').map(l => l.trim());
@@ -430,18 +471,13 @@
                 if (line.includes("Varsity") || line.includes("Relay") || line.includes("Wheelchair") || line.includes("Meters") || line.includes("WC") || line.includes("Hurdles")) {
                     if (line.includes("Results")) continue; 
                     if (/^\d+\./.test(line)) continue; 
-                    
                     currentEventName = cleanEventTitle(line, currentGenderSection);
-                    
-                    if (!parsedMeetDatabase[currentEventName]) {
-                        parsedMeetDatabase[currentEventName] = [];
-                    }
+                    if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
                     continue;
                 }
 
                 if (schoolRegex.test(line.split(' - ')[0])) { 
                     if (!currentEventName) continue;
-
                     let athleteLine = lines[i-1] ? lines[i-1].trim() : "";
                     
                     if (athleteLine && /^\d+\./.test(athleteLine)) {
@@ -451,7 +487,6 @@
                         if (line.includes(" - ")) {
                             let relayLetter = line.split(' - ')[1] || "A";
                             let dataObj = processAthNetLine(cleanedDetails);
-                            
                             parsedMeetDatabase[currentEventName].push({
                                 rank: matchRank || 99,
                                 athleteName: `Relay Team (${relayLetter})`,
@@ -470,17 +505,14 @@
                     }
                 }
             }
-
             finalizeParsingSequence();
         }
 
         function processAthNetLine(cleanedDetails) {
             let processingText = cleanedDetails.replace(/^\d+\.\s+/, '');
             processingText = stripWindReadings(processingText);
-            
             let loggedAsPR = /PB\b|PR\b|SB\b/i.test(processingText);
             processingText = processingText.replace(/\s*(PR|PB|SB)\s*/i, '').trim();
-            
             processingText = processingText.replace(/^([56789]|10|11|12)\s+/, '');
 
             let namePart = processingText.replace(/[\d\.\:\-].*$/, '').trim();
@@ -506,14 +538,13 @@
             let structuralKeys = Object.keys(parsedMeetDatabase).filter(key => parsedMeetDatabase[key].length > 0);
 
             if (structuralKeys.length === 0) {
-                alert(`No data entries found matching your specified school filters in this raw text.`);
+                alert(`No data entries found matching your specified school filters.`);
                 return;
             }
 
             structuralKeys.sort((a, b) => {
                 let aIsGirls = a.startsWith("Girls");
                 let bIsGirls = b.startsWith("Girls");
-                
                 if (genderPriority === 'girls') {
                     if (aIsGirls && !bIsGirls) return -1;
                     if (!aIsGirls && bIsGirls) return 1;
@@ -564,7 +595,6 @@
                     if (runner.rank === 1) medal = "🥇 ";
                     if (runner.rank === 2) medal = "🥈 ";
                     if (runner.rank === 3) medal = "🥉 ";
-                    
                     post += `${medal}${getOrdinalSuffix(runner.rank)}: ${runner.athleteName} - ${runner.mark}\n`;
                 });
             } else {
@@ -577,13 +607,8 @@
                 post += `⚡ ${prNames.join(', ')}\n`;
             }
 
-            if (resultsUrl) {
-                post += `\n📊 Live Results: ${resultsUrl}\n`;
-            }
-
-            if (hashtag) {
-                post += (resultsUrl ? '' : '\n') + hashtag;
-            }
+            if (resultsUrl) post += `\n📊 Live Results: ${resultsUrl}\n`;
+            if (hashtag) post += (resultsUrl ? '' : '\n') + hashtag;
 
             document.getElementById('outputPostText').value = post.trim();
             
@@ -602,7 +627,6 @@
 
             ctx.fillStyle = '#000000'; 
             ctx.fillRect(0, 0, 1080, 1080);
-
             ctx.fillStyle = '#fbbf24'; 
             ctx.fillRect(0, 0, 1080, 40);
 
@@ -620,10 +644,7 @@
 
             ctx.strokeStyle = '#222222'; 
             ctx.lineWidth = 4;
-            ctx.beginPath();
-            ctx.moveTo(140, 250);
-            ctx.lineTo(940, 250);
-            ctx.stroke();
+            ctx.beginPath(); ctx.moveTo(140, 250); ctx.lineTo(940, 250); ctx.stroke();
 
             let startY = 350;
             let itemSpacing = 110;
@@ -631,7 +652,6 @@
             if (placements.length > 0) {
                 placements.forEach((runner, idx) => {
                     let rowY = startY + (idx * itemSpacing);
-                    
                     ctx.fillStyle = '#111111'; 
                     ctx.fillRect(140, rowY - 50, 800, 84);
                     
@@ -639,7 +659,6 @@
                     else if (runner.rank === 2) ctx.fillStyle = '#e2e8f0'; 
                     else if (runner.rank === 3) ctx.fillStyle = '#d97706'; 
                     else ctx.fillStyle = '#06b6d4'; 
-                    
                     ctx.fillRect(140, rowY - 50, 15, 84);
 
                     ctx.fillStyle = '#a1a1aa'; 
@@ -693,9 +712,7 @@
             let initialY = y;
             for(let n = 0; n < words.length; n++) {
                 let testLine = line + words[n] + ' ';
-                let metrics = context.measureText(testLine);
-                let testWidth = metrics.width;
-                if (testWidth > maxWidth && n > 0) {
+                if (context.measureText(testLine).width > maxWidth && n > 0) {
                     context.fillText(line, x, y);
                     line = words[n] + ' ';
                     y += lineHeight;
@@ -732,14 +749,11 @@
             document.getElementById('outputScoreText').value = post.trim();
             const cnt = document.getElementById('scoreCharCounter');
             cnt.innerText = `${post.trim().length}/280`;
-            cnt.className = post.trim().length > 280 ? "absolute right-2 top-2 text-[10px] bg-red-950 px-1 rounded text-red-400 font-bold" : "absolute right-2 top-2 text-[10px] bg-gray-950 px-1 rounded text-gray-500 font-mono";
             
             const selectedEvent = document.getElementById('eventSelector').value;
             if(selectedEvent) {
                 const datasets = parsedMeetDatabase[selectedEvent] || [];
-                const platformPlacements = datasets.filter(item => item.rank <= currentPlacementCap);
-                const prAthletes = datasets.filter(item => item.isPR);
-                drawInstagramCanvas(selectedEvent, platformPlacements, document.getElementById('togglePR').checked ? prAthletes : []);
+                drawInstagramCanvas(selectedEvent, datasets.filter(item => item.rank <= currentPlacementCap), document.getElementById('togglePR').checked ? datasets.filter(item => item.isPR) : []);
             }
         }
 
@@ -758,13 +772,11 @@
             sortedEventNames.forEach(eventName => {
                 let items = parsedMeetDatabase[eventName] || [];
                 let winners = items.filter(a => a.rank === 1);
-                winners.forEach(w => {
-                    rawWinners.push({ event: eventName, name: w.athleteName, mark: w.mark });
-                });
+                winners.forEach(w => { rawWinners.push({ event: eventName, name: w.athleteName, mark: w.mark }); });
             });
 
             if(rawWinners.length === 0) {
-                container.innerHTML = `<div class="col-span-1 sm:col-span-2 text-xs text-amber-500 bg-gray-900 p-3 rounded-lg border border-gray-700 text-center">No 1st place finishers found in parsed results data.</div>`;
+                container.innerHTML = `<div class="col-span-1 sm:col-span-2 text-xs text-amber-500 bg-gray-900 p-3 rounded-lg border border-gray-700 text-center">No 1st place finishers found.</div>`;
                 return;
             }
 
@@ -772,17 +784,12 @@
             rawWinners.forEach(w => {
                 let shortEvent = w.event.replace("Girls ", "").replace("Boys ", "");
                 if (!groupedWinnersMap[w.name]) {
-                    groupedWinnersMap[w.name] = {
-                        fullName: w.name,
-                        gender: w.event.startsWith("Girls") ? "Girls" : "Boys",
-                        eventsList: []
-                    };
+                    groupedWinnersMap[w.name] = { fullName: w.name, gender: w.event.startsWith("Girls") ? "Girls" : "Boys", eventsList: [] };
                 }
                 groupedWinnersMap[w.name].eventsList.push(`${shortEvent} (${w.mark})`);
             });
 
             let consolidatedWinners = Object.values(groupedWinnersMap);
-
             let postDrafts = [];
             let baseHeader = `🏆 Meet Champions!`;
             let footer = "";
@@ -792,9 +799,7 @@
             let currentBody = "";
             consolidatedWinners.forEach((w) => {
                 let entryLine = `• ${w.fullName} (${w.gender}) - ${w.eventsList.join(', ')}\n`;
-                let layoutTest = `${baseHeader} (9/9) 🐾\n\n🥇 1st Place Finishes:\n${currentBody}${entryLine}${footer}`;
-                
-                if (layoutTest.trim().length > 280 && currentBody !== "") {
+                if (`${baseHeader} (9/9) 🐾\n\n🥇 1st Place Finishes:\n${currentBody}${entryLine}${footer}`.trim().length > 280 && currentBody !== "") {
                     postDrafts.push(currentBody);
                     currentBody = entryLine;
                 } else {
@@ -806,7 +811,6 @@
             postDrafts.forEach((bodyText, index) => {
                 let finalString = `🏆 Meet Champions! (${index + 1}/${postDrafts.length}) 🐾\n\n🥇 1st Place Finishes:\n${bodyText}${footer}`;
                 let areaId = `winner_post_${index}`;
-                
                 let wrapper = document.createElement('div');
                 wrapper.className = "bg-gray-900 p-3 rounded-lg border border-gray-700 space-y-2 flex flex-col justify-between";
                 wrapper.innerHTML = `
@@ -824,117 +828,70 @@
 
             const maxRowsPerSlide = 4;
             let slideGroups = [];
-            for (let i = 0; i < consolidatedWinners.length; i += maxRowsPerSlide) {
-                slideGroups.push(consolidatedWinners.slice(i, i + maxRowsPerSlide));
-            }
+            for (let i = 0; i < consolidatedWinners.length; i += maxRowsPerSlide) { slideGroups.push(consolidatedWinners.slice(i, i + maxRowsPerSlide)); }
 
             slideGroups.forEach((athletesInSlide, slideIndex) => {
                 const bulkCanvas = document.getElementById('bulkWinnersCanvas');
                 const bulkCtx = bulkCanvas.getContext('2d');
+                bulkCtx.fillStyle = '#000000'; bulkCtx.fillRect(0, 0, 1080, 1080);
+                bulkCtx.fillStyle = '#fbbf24'; bulkCtx.fillRect(0, 0, 1080, 40);
 
-                bulkCtx.fillStyle = '#000000';
-                bulkCanvas.getContext('2d').fillRect(0, 0, 1080, 1080);
-                
-                bulkCtx.fillStyle = '#fbbf24'; 
-                bulkCtx.fillRect(0, 0, 1080, 40);
-
-                bulkCtx.fillStyle = '#ffffff'; 
-                bulkCtx.font = '900 32px sans-serif';
-                bulkCtx.textAlign = 'center';
+                bulkCtx.fillStyle = '#ffffff'; bulkCtx.font = '900 32px sans-serif'; bulkCtx.textAlign = 'center';
                 bulkCtx.fillText(schoolName + " TRACK & FIELD", 540, 110);
 
-                bulkCtx.font = '900 68px sans-serif';
-                bulkCtx.lineWidth = 14;
-                bulkCtx.strokeStyle = '#000000';
-                bulkCtx.strokeText("MEET CHAMPIONS", 540, 195);
-                bulkCtx.fillStyle = '#fbbf24'; 
-                bulkCtx.fillText("MEET CHAMPIONS", 540, 195);
+                bulkCtx.font = '900 68px sans-serif'; bulkCtx.lineWidth = 14; bulkCtx.strokeStyle = '#000000';
+                bulkCtx.strokeText("MEET CHAMPIONS", 540, 195); bulkCtx.fillStyle = '#fbbf24'; bulkCtx.fillText("MEET CHAMPIONS", 540, 195);
 
-                bulkCtx.fillStyle = '#71717a';
-                bulkCtx.font = 'bold 24px sans-serif';
-                bulkCtx.fillText(`PAGE ${slideIndex + 1} OF ${slideGroups.length}`, 540, 240);
+                bulkCtx.fillStyle = '#71717a'; bulkCtx.font = 'bold 24px sans-serif'; bulkCtx.fillText(`PAGE ${slideIndex + 1} OF ${slideGroups.length}`, 540, 240);
 
-                bulkCtx.strokeStyle = '#222222'; 
-                bulkCtx.lineWidth = 4;
-                bulkCtx.beginPath();
-                bulkCtx.moveTo(140, 270);
-                bulkCtx.lineTo(940, 270);
-                bulkCtx.stroke();
+                bulkCtx.strokeStyle = '#222222'; bulkCtx.lineWidth = 4;
+                bulkCtx.beginPath(); bulkCtx.moveTo(140, 270); bulkCtx.lineTo(940, 270); bulkCtx.stroke();
 
                 let currentYPosition = 330;
-                const innerPadding = 30;
-
                 athletesInSlide.forEach((athlete) => {
                     bulkCtx.font = 'bold 24px sans-serif';
                     let eventsSubtext = `🏆 1st Place: ${athlete.eventsList.join(', ')}`;
-                    
+                    let linesCounter = 1;
                     let words = eventsSubtext.split(' ');
                     let currentTestingLine = '';
-                    let linesCounter = 1;
-                    
                     for (let n = 0; n < words.length; n++) {
                         let testLine = currentTestingLine + words[n] + ' ';
-                        if (bulkCtx.measureText(testLine).width > 720 && n > 0) {
-                            linesCounter++;
-                            currentTestingLine = words[n] + ' ';
-                        } else {
-                            currentTestingLine = testLine;
-                        }
+                        if (bulkCtx.measureText(testLine).width > 720 && n > 0) { linesCounter++; currentTestingLine = words[n] + ' '; }
+                        else { currentTestingLine = testLine; }
                     }
 
-                    let calculatedTextHeight = 45 + (linesCounter * 32); 
-                    let totalBoxHeight = calculatedTextHeight + (innerPadding * 2);
+                    let totalBoxHeight = (45 + (linesCounter * 32)) + 60;
+                    bulkCtx.fillStyle = '#111111'; bulkCtx.fillRect(140, currentYPosition, 800, totalBoxHeight);
+                    bulkCtx.fillStyle = '#fbbf24'; bulkCtx.fillRect(140, currentYPosition, 15, totalBoxHeight);
 
-                    bulkCtx.fillStyle = '#111111';
-                    bulkCtx.fillRect(140, currentYPosition, 800, totalBoxHeight);
+                    bulkCtx.fillStyle = '#ffffff'; bulkCtx.font = '900 36px sans-serif'; bulkCtx.textAlign = 'left';
+                    bulkCtx.fillText(athlete.fullName.toUpperCase(), 180, currentYPosition + 54);
 
-                    bulkCtx.fillStyle = '#fbbf24';
-                    bulkCtx.fillRect(140, currentYPosition, 15, totalBoxHeight);
+                    bulkCtx.fillStyle = '#222222'; bulkCtx.fillRect(820, currentYPosition + 30, 95, 45);
+                    bulkCtx.fillStyle = '#a1a1aa'; bulkCtx.font = 'bold 20px sans-serif'; bulkCtx.textAlign = 'center';
+                    bulkCtx.fillText(athlete.gender.toUpperCase(), 867, currentYPosition + 60);
 
-                    bulkCtx.fillStyle = '#ffffff';
-                    bulkCtx.font = '900 36px sans-serif';
-                    bulkCtx.textAlign = 'left';
-                    bulkCtx.fillText(athlete.fullName.toUpperCase(), 180, currentYPosition + innerPadding + 24);
-
-                    bulkCtx.fillStyle = '#222222';
-                    bulkCtx.fillRect(820, currentYPosition + innerPadding, 95, 45);
-                    
-                    bulkCtx.fillStyle = '#a1a1aa';
-                    bulkCtx.font = 'bold 20px sans-serif';
-                    bulkCtx.textAlign = 'center';
-                    bulkCtx.fillText(athlete.gender.toUpperCase(), 867, currentYPosition + innerPadding + 30);
-
-                    bulkCtx.fillStyle = '#a1a1aa';
-                    bulkCtx.font = 'bold 24px sans-serif';
-                    bulkCtx.textAlign = 'left';
-                    
-                    wrapCanvasText(bulkCtx, eventsSubtext, 180, currentYPosition + innerPadding + 70, 720, 32);
+                    bulkCtx.fillStyle = '#a1a1aa'; bulkCtx.font = 'bold 24px sans-serif'; bulkCtx.textAlign = 'left';
+                    wrapCanvasText(bulkCtx, eventsSubtext, 180, currentYPosition + 100, 720, 32);
                     currentYPosition += totalBoxHeight + 25;
                 });
 
                 if(hashtag) {
-                    bulkCtx.fillStyle = '#71717a';
-                    bulkCtx.font = 'bold 28px sans-serif';
-                    bulkCtx.textAlign = 'center';
+                    bulkCtx.fillStyle = '#71717a'; bulkCtx.font = 'bold 28px sans-serif'; bulkCtx.textAlign = 'center';
                     bulkCtx.fillText(hashtag, 540, 1040);
                 }
 
                 let slideDataUrl = bulkCanvas.toDataURL('image/png');
-
                 let graphicCardWrapper = document.createElement('div');
                 graphicCardWrapper.className = "bg-gray-900 p-3 rounded-xl border border-gray-700 flex flex-col justify-between items-center text-center space-y-3 shadow-md";
-                
-                let uniqueImgId = `bulk_img_frame_${slideIndex}`;
                 graphicCardWrapper.innerHTML = `
                     <div class="w-full">
                         <span class="text-[10px] font-mono text-pink-400 block mb-1 uppercase tracking-wider">📸 WINNERS GRAPHIC PAGE ${slideIndex + 1}</span>
                         <div class="w-full aspect-square bg-gray-950 rounded-lg border border-gray-800 overflow-hidden shadow-inner max-w-[180px] mx-auto">
-                            <img id="${uniqueImgId}" src="${slideDataUrl}" class="w-full h-full object-contain" alt="Winners page preview">
+                            <img src="${slideDataUrl}" class="w-full h-full object-contain">
                         </div>
                     </div>
-                    <button onclick="downloadDirectBulkSlide('${slideDataUrl}', ${slideIndex + 1})" class="w-full bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2 rounded text-xs uppercase tracking-wider transition-all">
-                        📥 Download Page ${slideIndex + 1}
-                    </button>
+                    <button onclick="downloadDirectBulkSlide('${slideDataUrl}', ${slideIndex + 1})" class="w-full bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2 rounded text-xs uppercase tracking-wider transition-all">📥 Download Page ${slideIndex + 1}</button>
                 `;
                 container.appendChild(graphicCardWrapper);
             });
@@ -951,21 +908,9 @@
             const textarea = document.getElementById(elementId);
             textarea.select();
             navigator.clipboard.writeText(textarea.value);
-
             const baseLabel = buttonEl.innerText;
-            buttonEl.innerText = "✅ Copied to Clipboard!";
-            buttonEl.className = buttonEl.className.replace('bg-emerald-600', 'bg-emerald-500').replace('bg-indigo-700', 'bg-emerald-500').replace('bg-cyan-700', 'bg-emerald-500');
-            
-            setTimeout(() => {
-                buttonEl.innerText = baseLabel;
-                if(elementId === 'outputPostText') {
-                    buttonEl.className = "w-full mt-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider shadow-md";
-                } else if(elementId === 'outputScoreText') {
-                    buttonEl.className = "w-full mt-2 bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-bold py-2 rounded uppercase tracking-wider shadow-sm";
-                } else {
-                    buttonEl.className = "w-full mt-2 bg-indigo-700 hover:bg-indigo-600 text-white text-[11px] font-bold py-2 rounded transition-all uppercase tracking-wider";
-                }
-            }, 1500);
+            buttonEl.innerText = "✅ Copied!";
+            setTimeout(() => { buttonEl.innerText = baseLabel; }, 1500);
         }
     </script>
 </body>
