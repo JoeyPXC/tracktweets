@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Track Social Post Builder</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { -webkit-tap-highlight-color: transparent; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
+
+    <div class="max-w-md mx-auto p-4 pb-12">
+        <!-- Header -->
+        <header class="mb-6 text-center">
+            <h1 class="text-2xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
+                ⚡ <span>TRACK POST ENGINE</span>
+            </h1>
+            <p class="text-xs text-gray-400 mt-1">High-density character layouts optimized for maximum 280-limit efficiency.</p>
+        </header>
+
+        <!-- Step 1: Configuration -->
+        <div class="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700 shadow-lg">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">1. Setup Filters</h2>
+            <div class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1">Your School Team</label>
+                        <input type="text" id="schoolInput" value="Mass. Perry" placeholder="e.g. Mass. Perry" 
+                               class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1">Hashtag</label>
+                        <input type="text" id="hashtagInput" value="#GoPanthers" placeholder="e.g. #GoPanthers" 
+                               class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1">Live Results URL <span class="text-[10px] text-gray-500 font-normal">(Optional)</span></label>
+                    <input type="text" id="linkInput" oninput="renderSocialPost()" placeholder="e.g. athletic.net/meet/12345/results" 
+                           class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600">
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Paste Clipboard Text -->
+        <div class="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700 shadow-lg">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">2. Paste Athletic.net Data</h2>
+            <textarea id="rawResults" rows="5" 
+                      placeholder="Select All (Ctrl+A) and paste results here..." 
+                      onfocus="this.select()"
+                      class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600 transition-all"></textarea>
+            
+            <button onclick="processAthleticNetData()" 
+                    class="w-full mt-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold py-3 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md">
+                Build Event Lists 📊
+            </button>
+        </div>
+
+        <!-- Step 3: Interactive Event Dashboard -->
+        <div id="dashboardSection" class="hidden space-y-4">
+            <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg space-y-3">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400">3. Select Event & Settings</h2>
+                
+                <!-- Schedule Order Gender Toggle -->
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Schedule Priority Order</label>
+                    <div class="grid grid-cols-2 gap-2 bg-gray-900 p-1 rounded-lg border border-gray-700">
+                        <button id="genderGirlsFirst" onclick="setGenderOrder('girls')" class="py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all">Girls First 🏃‍♀️</button>
+                        <button id="genderBoysFirst" onclick="setGenderOrder('boys')" class="py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all">Boys First 🏃‍♂️</button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Choose Event</label>
+                    <select id="eventSelector" onchange="renderSocialPost()" 
+                            class="w-full bg-gray-900 border border-amber-500 rounded-lg p-3 text-sm focus:outline-none text-white font-bold tracking-tight">
+                    </select>
+                </div>
+
+                <!-- Meet Bracket Type Toggle -->
+                <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Placement Filter Range</label>
+                    <div class="grid grid-cols-2 gap-2 bg-gray-900 p-1 rounded-lg border border-gray-700">
+                        <button id="modeTop3" onclick="setMeetMode(3)" class="py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all">Dual (Top 3)</button>
+                        <button id="modeTop8" onclick="setMeetMode(8)" class="py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all">Invite (Top 8)</button>
+                    </div>
+                </div>
+
+                <!-- Dynamic PR Toggle Switch -->
+                <label class="flex items-center justify-between p-2 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer select-none">
+                    <span class="text-xs font-semibold text-gray-300">Include PR Roster at bottom</span>
+                    <div class="relative">
+                        <input type="checkbox" id="togglePR" onchange="renderSocialPost()" checked class="sr-only peer">
+                        <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                    </div>
+                </label>
+            </div>
+
+            <!-- Calculated Output Area -->
+            <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-xs font-bold uppercase tracking-wider text-amber-400">📱 Single Event Output</span>
+                    <span id="charCounter" class="text-xs font-mono px-2 py-0.5 bg-gray-900 rounded text-gray-400">0/280</span>
+                </div>
+                
+                <textarea id="outputPostText" rows="9" readonly 
+                          class="w-full bg-gray-900 text-gray-100 p-3 rounded-lg text-xs font-mono border border-gray-700 focus:outline-none resize-none leading-relaxed"></textarea>
+                
+                <button onclick="copyPostToClipboard('outputPostText', this)" 
+                        class="w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md">
+                    📋 Copy Event Post
+                </button>
+            </div>
+
+            <!-- Bulk Team Winners Section -->
+            <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-2">🏆 All-Meet Team Winners</h2>
+                <p class="text-[11px] text-gray-400 mb-3">Compiles every 1st place finisher from your team across the entire meet into optimized chunks.</p>
+                
+                <button onclick="generateAllWinnersPosts()" 
+                        class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-widest transition-all shadow-md">
+                    ⚡ Generate Winners Post(s)
+                </button>
+
+                <div id="bulkWinnersContainer" class="mt-4 space-y-3 hidden">
+                    <!-- Dynamic multi-posts populate here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logic Engine Core -->
+    <script>
+        let parsedMeetDatabase = {};
+        let currentPlacementCap = 3; 
+        let genderPriority = 'girls'; 
+
+        function cleanPerformanceMark(markStr) {
+            if(!markStr) return "";
+            let clean = markStr.replace(/(\d+(\.\d+)?)\s*[aAhH]+\b/g, '$1');
+            clean = clean.replace(/(\d+)\s*[aA]$/g, '$1');
+            return clean.trim();
+        }
+
+        function stripWindReadings(textStr) {
+            return textStr.replace(/\s*\(\s*-?\d+(\.\d+)?\s*\)\s*/g, ' ').trim();
+        }
+
+        function setMeetMode(cap) {
+            currentPlacementCap = cap;
+            document.getElementById('modeTop3').className = cap === 3 ? "py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all" : "py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
+            document.getElementById('modeTop8').className = cap === 8 ? "py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all" : "py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
+            renderSocialPost();
+        }
+
+        function setGenderOrder(order) {
+            genderPriority = order;
+            document.getElementById('genderGirlsFirst').className = order === 'girls' ? "py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all" : "py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
+            document.getElementById('genderBoysFirst').className = order === 'boys' ? "py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all" : "py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all";
+            
+            populateEventSelector();
+        }
+
+        function cleanEventTitle(rawTitle, genderSection) {
+            let isWheelchair = rawTitle.toLowerCase().includes("wheelchair") || rawTitle.toLowerCase().includes("wc");
+            
+            let clean = rawTitle
+                .replace(/\s*Varsity\s*-\s*Finals/gi, "")
+                .replace(/\s*Wheelchair\s*-\s*Finals/gi, "")
+                .replace(/\s*-\s*Finals/gi, "")
+                .replace(/\s*Finals/gi, "")
+                .replace(/\s*Varsity/gi, "")
+                .replace(/\s*Wheelchair/gi, "")
+                .trim();
+            
+            clean = clean.replace(/\s*[-\/]\s*\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?/gi, "");
+            clean = clean.replace(/\s+\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?$/gi, "");
+            
+            clean = clean.replace(/\s*[-\/]\s*$/g, "").trim();
+            clean = clean.replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "");
+            clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
+
+            clean = clean.replace(/4x100\s*Relay/i, "4x100 Relay");
+            clean = clean.replace(/4x200\s*Relay/i, "4x200 Relay");
+            clean = clean.replace(/4x400\s*Relay/i, "4x400 Relay");
+            clean = clean.replace(/4x800\s*Relay/i, "4x800 Relay");
+
+            let baseTitle = `${genderSection} ${clean}`.replace(/\s+/g, ' ').trim();
+            
+            if (isWheelchair) {
+                baseTitle = baseTitle.replace(/\s+Relay/i, "");
+                baseTitle = baseTitle.replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "");
+                baseTitle += " WC";
+            }
+            
+            return baseTitle;
+        }
+
+        function processAthNetLine(cleanedDetails) {
+            let processingText = cleanedDetails.replace(/^\d+\.\s+/, '');
+            processingText = stripWindReadings(processingText);
+            
+            let loggedAsPR = /PB\b|PR\b|SB\b/i.test(processingText);
+            processingText = processingText.replace(/\s*(PR|PB|SB)\s*/i, '').trim();
+            
+            processingText = processingText.replace(/^([56789]|10|11|12)\s+/, '');
+
+            let namePart = processingText.replace(/[\d\.\:\-].*$/, '').trim();
+            let markPart = processingText.substring(processingText.indexOf(namePart) + namePart.length).trim();
+            markPart = cleanPerformanceMark(markPart);
+
+            return { name: namePart, mark: markPart, isPR: loggedAsPR };
+        }
+
+        function processAthleticNetData() {
+            const rawText = document.getElementById('rawResults').value;
+            const targetSchool = document.getElementById('schoolInput').value.trim();
+
+            if (!rawText || !targetSchool) {
+                alert("Please paste your raw data and specify your school filters.");
+                return;
+            }
+
+            parsedMeetDatabase = {};
+            const lines = rawText.split('\n').map(l => l.trim());
+            
+            let currentGenderSection = "Boys"; 
+            let currentEventName = "";
+            const schoolRegex = new RegExp('^' + targetSchool.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '$', 'i');
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i];
+                if (!line) continue;
+
+                if (line.toLowerCase().includes("prelims")) {
+                    currentEventName = ""; 
+                    continue;
+                }
+
+                if (line.includes("Mens Results")) { currentGenderSection = "Boys"; continue; }
+                if (line.includes("Womens Results")) { currentGenderSection = "Girls"; continue; }
+
+                if (line.includes("Varsity") || line.includes("Relay") || line.includes("Wheelchair") || line.includes("Meters") || line.includes("WC") || line.includes("Hurdles")) {
+                    if (line.includes("Results")) continue; 
+                    if (/^\d+\./.test(line)) continue; 
+                    
+                    currentEventName = cleanEventTitle(line, currentGenderSection);
+                    
+                    if (!parsedMeetDatabase[currentEventName]) {
+                        parsedMeetDatabase[currentEventName] = [];
+                    }
+                    continue;
+                }
+
+                if (schoolRegex.test(line.split(' - ')[0])) { 
+                    if (!currentEventName) continue;
+
+                    let athleteLine = lines[i-1] ? lines[i-1].trim() : "";
+                    
+                    if (athleteLine && /^\d+\./.test(athleteLine)) {
+                        let cleanedDetails = athleteLine.replace(/\s+/g, ' ');
+                        let matchRank = parseInt(cleanedDetails.match(/^\d+/));
+                        
+                        if (line.includes(" - ")) {
+                            let relayLetter = line.split(' - ')[1] || "A";
+                            let dataObj = processAthNetLine(cleanedDetails);
+                            
+                            parsedMeetDatabase[currentEventName].push({
+                                rank: matchRank || 99,
+                                athleteName: `Relay Team (${relayLetter})`,
+                                mark: dataObj.mark || dataObj.name, 
+                                isPR: false
+                            });
+                        } else {
+                            let dataObj = processAthNetLine(cleanedDetails);
+                            parsedMeetDatabase[currentEventName].push({
+                                rank: matchRank || 99,
+                                athleteName: dataObj.name,
+                                mark: dataObj.mark,
+                                isPR: dataObj.isPR
+                            });
+                        }
+                    }
+                }
+            }
+
+            populateEventSelector();
+            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('bulkWinnersContainer').classList.add('hidden');
+        }
+
+        function populateEventSelector() {
+            const selector = document.getElementById('eventSelector');
+            const savedSelectedValue = selector.value;
+            selector.innerHTML = "";
+
+            let structuralKeys = Object.keys(parsedMeetDatabase).filter(key => parsedMeetDatabase[key].length > 0);
+
+            if (structuralKeys.length === 0) {
+                alert(`No data entries found matching parameters.`);
+                return;
+            }
+
+            structuralKeys.sort((a, b) => {
+                let aIsGirls = a.startsWith("Girls");
+                let bIsGirls = b.startsWith("Girls");
+                
+                if (genderPriority === 'girls') {
+                    if (aIsGirls && !bIsGirls) return -1;
+                    if (!aIsGirls && bIsGirls) return 1;
+                } else {
+                    if (!aIsGirls && bIsGirls) return -1;
+                    if (aIsGirls && !bIsGirls) return 1;
+                }
+                return a.localeCompare(b);
+            });
+
+            structuralKeys.forEach(eventName => {
+                let option = document.createElement('option');
+                option.value = option.innerText = eventName;
+                if(eventName === savedSelectedValue) option.selected = true;
+                selector.appendChild(option);
+            });
+
+            renderSocialPost();
+        }
+
+        function getOrdinalSuffix(i) {
+            let j = i % 10, k = i % 100;
+            if (j == 1 && k != 11) return i + "st";
+            if (j == 2 && k != 12) return i + "nd";
+            if (j == 3 && k != 13) return i + "rd";
+            return i + "th";
+        }
+
+        function renderSocialPost() {
+            const selectedEvent = document.getElementById('eventSelector').value;
+            if (!selectedEvent) return;
+
+            const hashtag = document.getElementById('hashtagInput').value.trim();
+            const resultsUrl = document.getElementById('linkInput').value.trim();
+            const showPR = document.getElementById('togglePR').checked;
+            
+            const datasets = parsedMeetDatabase[selectedEvent] || [];
+            datasets.sort((a, b) => a.rank - b.rank);
+
+            const platformPlacements = datasets.filter(item => item.rank <= currentPlacementCap);
+            const prAthletes = datasets.filter(item => item.isPR);
+
+            let post = `🏁 ${selectedEvent} Results! 🐾\n\n`;
+            
+            if (platformPlacements.length > 0) {
+                platformPlacements.forEach(runner => {
+                    let medal = "• ";
+                    if (runner.rank === 1) medal = "🥇 ";
+                    if (runner.rank === 2) medal = "🥈 ";
+                    if (runner.rank === 3) medal = "🥉 ";
+                    
+                    post += `${medal}${getOrdinalSuffix(runner.rank)}: ${runner.athleteName} - ${runner.mark}\n`;
+                });
+            } else {
+                post += `No qualifying team placement scorers inside Top ${currentPlacementCap}.\n`;
+            }
+
+            if (showPR && prAthletes.length > 0) {
+                post += `\n🔥 New Personal Bests:\n`;
+                let prNames = prAthletes.map(a => `${a.athleteName} - ${a.mark}`);
+                post += `⚡ ${prNames.join(', ')}\n`;
+            }
+
+            if (resultsUrl) {
+                post += `\n📊 Live Results: ${resultsUrl}\n`;
+            }
+
+            if (hashtag) {
+                post += (resultsUrl ? '' : '\n') + hashtag;
+            }
+
+            document.getElementById('outputPostText').value = post.trim();
+            
+            const counterEl = document.getElementById('charCounter');
+            counterEl.innerText = `${post.trim().length}/280`;
+            counterEl.className = post.trim().length > 280 ? "text-xs font-mono px-2 py-0.5 bg-red-950 rounded text-red-400 font-bold" : "text-xs font-mono px-2 py-0.5 bg-gray-900 rounded text-gray-400";
+        }
+
+        function generateAllWinnersPosts() {
+            const hashtag = document.getElementById('hashtagInput').value.trim();
+            const resultsUrl = document.getElementById('linkInput').value.trim();
+            const container = document.getElementById('bulkWinnersContainer');
+            container.innerHTML = "";
+            container.classList.remove('hidden');
+
+            let allWinners = [];
+            let sortedEventNames = Array.from(document.getElementById('eventSelector').options).map(o => o.value);
+
+            sortedEventNames.forEach(eventName => {
+                let items = parsedMeetDatabase[eventName] || [];
+                let winners = items.filter(a => a.rank === 1);
+                winners.forEach(w => {
+                    allWinners.push({ event: eventName, name: w.athleteName, mark: w.mark });
+                });
+            });
+
+            if(allWinners.length === 0) {
+                container.innerHTML = `<div class="text-xs text-amber-500 bg-gray-900 p-3 rounded-lg border border-gray-700 text-center">No 1st place finishers found in parsed results data.</div>`;
+                return;
+            }
+
+            let postDrafts = [];
+            let baseHeader = `🏆 Meet Champions!`;
+            let footer = "";
+            if (resultsUrl) footer += `\n📊 Live Results: ${resultsUrl}`;
+            if (hashtag) footer += `\n${hashtag}`;
+            
+            let currentBody = "";
+            
+            allWinners.forEach((w) => {
+                let entryLine = `• ${w.event}: ${w.name} - ${w.mark}\n`;
+                // Build a strict check checking length limit constraints
+                let layoutTest = `${baseHeader} (9/9) 🐾\n\n🥇 1st Place Finishes:\n${currentBody}${entryLine}${footer}`;
+                
+                if (layoutTest.trim().length > 280 && currentBody !== "") {
+                    postDrafts.push(currentBody);
+                    currentBody = entryLine;
+                } else {
+                    currentBody += entryLine;
+                }
+            });
+            if(currentBody) postDrafts.push(currentBody);
+
+            postDrafts.forEach((bodyText, index) => {
+                let finalString = `🏆 Meet Champions! (${index + 1}/${postDrafts.length}) 🐾\n\n🥇 1st Place Finishes:\n${bodyText}${footer}`;
+                
+                let wrapper = document.createElement('div');
+                wrapper.className = "bg-gray-900 p-3 rounded-lg border border-gray-700 space-y-2 relative";
+                
+                let areaId = `winner_post_${index}`;
+                wrapper.innerHTML = `
+                    <div class="flex justify-between items-center text-[10px] text-gray-500 font-mono">
+                        <span>CHUNK CHANNELS ${index + 1} OF ${postDrafts.length}</span>
+                        <span class="bg-gray-800 text-gray-400 px-1.5 py-0.5 rounded">${finalString.trim().length}/280 Chars</span>
+                    </div>
+                    <textarea id="${areaId}" readonly class="w-full bg-gray-950 p-2 text-xs font-mono text-gray-200 rounded border border-gray-800 h-32 focus:outline-none leading-relaxed">${finalString.trim()}</textarea>
+                    <button onclick="copyPostToClipboard('${areaId}', this)" class="w-full bg-indigo-700 hover:bg-indigo-600 text-white text-[11px] font-bold py-1.5 rounded transition-all">📋 Copy Chunk</button>
+                `;
+                container.appendChild(wrapper);
+            });
+        }
+
+        function copyPostToClipboard(elementId, buttonEl) {
+            const textarea = document.getElementById(elementId);
+            textarea.select();
+            navigator.clipboard.writeText(textarea.value);
+
+            const baseLabel = buttonEl.innerText;
+            buttonEl.innerText = "✅ Copied to Clipboard!";
+            buttonEl.className = buttonEl.className.replace('bg-emerald-600', 'bg-emerald-500').replace('bg-indigo-700', 'bg-emerald-500');
+            
+            setTimeout(() => {
+                buttonEl.innerText = baseLabel;
+                if(elementId === 'outputPostText') {
+                    buttonEl.className = "w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md";
+                } else {
+                    buttonEl.className = "w-full bg-indigo-700 hover:bg-indigo-600 text-white text-[11px] font-bold py-1.5 rounded transition-all";
+                }
+            }, 1500);
+        }
+    </script>
+</body>
+</html>
