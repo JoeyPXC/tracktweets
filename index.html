@@ -219,8 +219,22 @@
         }
 
         function cleanEventTitle(rawTitle, genderSection) {
-            let isWheelchair = rawTitle.toLowerCase().includes("wheelchair") || rawTitle.toLowerCase().includes("wc");
-            let clean = rawTitle
+            let clean = rawTitle.trim();
+            let isWheelchair = /wheelchair|wc\b/i.test(clean);
+
+            // Extract leading gender prefix first to avoid double-prepend (e.g. "Boys Boys 400m")
+            let inferredGender = genderSection;
+            if (/^Girls\s/i.test(clean)) { inferredGender = "Girls"; clean = clean.replace(/^Girls\s+/i, ""); }
+            else if (/^Boys\s/i.test(clean))  { inferredGender = "Boys";  clean = clean.replace(/^Boys\s+/i,  ""); }
+
+            // Strip division markers BEFORE number-stripping regexes eat "Div 1" → "Div"
+            clean = clean.replace(/\s*Div(?:ision)?\s*\d+/gi, "");
+
+            // Strip hurdle height markers (33", 39", 30", 36") before they confuse other regexes
+            clean = clean.replace(/\s*\d{2}["']\s*/g, " ");
+
+            // Strip common suffixes
+            clean = clean
                 .replace(/\s*Varsity\s*-\s*Finals/gi, "")
                 .replace(/\s*Wheelchair\s*-\s*Finals/gi, "")
                 .replace(/\s*-\s*Finals/gi, "")
@@ -228,18 +242,22 @@
                 .replace(/\s*Varsity/gi, "")
                 .replace(/\s*Wheelchair/gi, "")
                 .trim();
+
+            // Strip trailing weight/distance/implement markers
             clean = clean.replace(/\s*-\s*\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?/gi, "");
             clean = clean.replace(/\s+\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?$/gi, "");
             clean = clean.replace(/\s*-\s*$/g, "").trim();
             clean = clean.replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "");
+
+            // Normalize event name formats
             clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
             clean = clean.replace(/(\d+)\s*meter\s+Dash/gi, "$1m Dash");
-            clean = clean.replace(/4x100\s*Relay/i, "4x100 Relay");
-            clean = clean.replace(/4x200\s*Relay/i, "4x200 Relay");
-            clean = clean.replace(/4x400\s*Relay/i, "4x400 Relay");
-            clean = clean.replace(/4x800\s*Relay/i, "4x800 Relay");
+            clean = clean.replace(/4x100\s*m?R?/i, "4x100 Relay").replace(/4x100 Relay\s*Relay/i, "4x100 Relay");
+            clean = clean.replace(/4x200\s*m?R?/i, "4x200 Relay").replace(/4x200 Relay\s*Relay/i, "4x200 Relay");
+            clean = clean.replace(/4x400\s*m?R?/i, "4x400 Relay").replace(/4x400 Relay\s*Relay/i, "4x400 Relay");
+            clean = clean.replace(/4x800\s*m?R?/i, "4x800 Relay").replace(/4x800 Relay\s*Relay/i, "4x800 Relay");
 
-            let baseTitle = `${genderSection} ${clean}`.replace(/\s+/g, ' ').trim();
+            let baseTitle = `${inferredGender} ${clean}`.replace(/\s+/g, ' ').trim();
             if (isWheelchair) {
                 baseTitle = baseTitle.replace(/\s+Relay/i, "").replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "") + " WC";
             }
@@ -284,7 +302,10 @@
             let currentEventName = "Unknown Event";
 
             // Scan headers to find event name and gender
-            for (let i = 0; i < Math.min(lines.length, 30); i++) {
+            // Skip Athletic.LIVE UI/nav lines that contain event keywords but aren't the result header
+            const skipNavLine = /^(results|prelims|entries|start lists|records|schedule|official|finals|division|type|live|events|follow|teams|athletes|scores|home|dark|light|winners|mvp|location|search|features|about|links|contact|timers|meet directors|parents|coaches|version)$/i;
+            for (let i = 0; i < Math.min(lines.length, 40); i++) {
+                if (skipNavLine.test(lines[i])) continue;
                 if (/girls|womens/i.test(lines[i])) currentGenderSection = "Girls";
                 if (/boys|mens/i.test(lines[i])) currentGenderSection = "Boys";
                 if (/\d+m|dash|hurdles|relay|run|shot|discus|vault|jump/i.test(lines[i]) && !/schedule|division|type|official/i.test(lines[i])) {
