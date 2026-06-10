@@ -12,7 +12,6 @@
 <body class="bg-gray-900 text-gray-100 min-h-screen font-sans antialiased">
 
     <div class="max-w-md mx-auto p-4 pb-12">
-        <!-- Header -->
         <header class="mb-6 text-center">
             <h1 class="text-2xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
                 ⚡ <span>TRACK POST ENGINE</span>
@@ -20,7 +19,6 @@
             <p class="text-xs text-gray-400 mt-1">High-density character layouts optimized for maximum 280-limit efficiency.</p>
         </header>
 
-        <!-- Step 1: Configuration -->
         <div class="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700 shadow-lg">
             <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">1. Setup Filters</h2>
             <div class="space-y-3">
@@ -32,19 +30,18 @@
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-400 mb-1">Hashtag</label>
-                        <input type="text" id="hashtagInput" value="#GoPanthers" placeholder="e.g. #GoPanthers" 
+                        <input type="text" id="hashtagInput" value="#GoPanthers" placeholder="e.g. #GoPanthers"  oninput="renderSocialPost(); updateScorePost();"
                                class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-gray-400 mb-1">Live Results URL <span class="text-[10px] text-gray-500 font-normal">(Optional)</span></label>
-                    <input type="text" id="linkInput" oninput="renderSocialPost()" placeholder="e.g. athletic.net/meet/12345/results" 
+                    <input type="text" id="linkInput" oninput="renderSocialPost(); updateScorePost();" placeholder="e.g. athletic.net/meet/12345/results" 
                            class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600">
                 </div>
             </div>
         </div>
 
-        <!-- Step 2: Paste Clipboard Text -->
         <div class="bg-gray-800 rounded-xl p-4 mb-4 border border-gray-700 shadow-lg">
             <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-2">2. Paste Athletic.net Data</h2>
             <textarea id="rawResults" rows="5" 
@@ -58,12 +55,10 @@
             </button>
         </div>
 
-        <!-- Step 3: Interactive Event Dashboard -->
         <div id="dashboardSection" class="hidden space-y-4">
             <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg space-y-3">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400">3. Select Event & Settings</h2>
                 
-                <!-- Schedule Order Gender Toggle -->
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Schedule Priority Order</label>
                     <div class="grid grid-cols-2 gap-2 bg-gray-900 p-1 rounded-lg border border-gray-700">
@@ -79,16 +74,14 @@
                     </select>
                 </div>
 
-                <!-- Meet Bracket Type Toggle -->
                 <div>
                     <label class="block text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">Placement Filter Range</label>
                     <div class="grid grid-cols-2 gap-2 bg-gray-900 p-1 rounded-lg border border-gray-700">
-                        <button id="modeTop3" onclick="setMeetMode(3)" class="py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all">Dual (Top 3)</button>
-                        <button id="modeTop8" onclick="setMeetMode(8)" class="py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all">Invite (Top 8)</button>
+                        <button id="modeTop3" onclick="setMeetMode(3)" class="py-1.5 text-xs font-bold rounded-md bg-amber-500 text-gray-950 transition-all">Dual Meet (Top 3)</button>
+                        <button id="modeTop8" onclick="setMeetMode(8)" class="py-1.5 text-xs font-bold rounded-md text-gray-400 hover:text-white transition-all">Invitational (Top 8)</button>
                     </div>
                 </div>
 
-                <!-- Dynamic PR Toggle Switch -->
                 <label class="flex items-center justify-between p-2 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer select-none">
                     <span class="text-xs font-semibold text-gray-300">Include PR Roster at bottom</span>
                     <div class="relative">
@@ -98,7 +91,6 @@
                 </label>
             </div>
 
-            <!-- Calculated Output Area -->
             <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
                 <div class="flex justify-between items-center mb-2">
                     <span class="text-xs font-bold uppercase tracking-wider text-amber-400">📱 Single Event Output</span>
@@ -114,7 +106,6 @@
                 </button>
             </div>
 
-            <!-- Bulk Team Winners Section -->
             <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
                 <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-2">🏆 All-Meet Team Winners</h2>
                 <p class="text-[11px] text-gray-400 mb-3">Compiles every 1st place finisher from your team across the entire meet into optimized chunks.</p>
@@ -125,13 +116,36 @@
                 </button>
 
                 <div id="bulkWinnersContainer" class="mt-4 space-y-3 hidden">
-                    <!-- Dynamic multi-posts populate here -->
+                    </div>
+            </div>
+
+            <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">📢 Final Meet Score Generator</h2>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                        <label class="block text-[10px] text-gray-400 font-semibold mb-1">GIRLS SCORE INFO</label>
+                        <input type="text" id="girlsScoreInput" oninput="updateScorePost()" placeholder="e.g. Perry 84, Oak 52" 
+                               class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-white">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-gray-400 font-semibold mb-1">BOYS SCORE INFO</label>
+                        <input type="text" id="boysScoreInput" oninput="updateScorePost()" placeholder="e.g. Perry 71, Oak 68" 
+                               class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs text-white">
+                    </div>
                 </div>
+                <div class="relative">
+                    <textarea id="outputScoreText" rows="5" readonly 
+                              class="w-full bg-gray-900 text-gray-300 p-2 text-xs font-mono rounded border border-gray-700 focus:outline-none"></textarea>
+                    <span id="scoreCharCounter" class="absolute right-2 top-2 text-[10px] bg-gray-950 px-1 rounded text-gray-500 font-mono">0/280</span>
+                </div>
+                <button onclick="copyPostToClipboard('outputScoreText', this)" 
+                        class="w-full mt-2 bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-bold py-2 rounded uppercase tracking-wider shadow-sm">
+                    📋 Copy Final Scores Post
+                </button>
             </div>
         </div>
     </div>
 
-    <!-- Logic Engine Core -->
     <script>
         let parsedMeetDatabase = {};
         let currentPlacementCap = 3; 
@@ -139,8 +153,19 @@
 
         function cleanPerformanceMark(markStr) {
             if(!markStr) return "";
+            // Clean hand-timing variations
             let clean = markStr.replace(/(\d+(\.\d+)?)\s*[aAhH]+\b/g, '$1');
             clean = clean.replace(/(\d+)\s*[aA]$/g, '$1');
+            
+            // Field Event Dual Unit Stripping: Drops whatever secondary reading is hidden inside parenthetical text blocks
+            if (clean.includes("(")) {
+                clean = clean.split("(")[0].trim();
+            }
+
+            // High-Density Distance Compression: Conversions from (45' 10.25") to (45-10.25) to reclaim post length space
+            if (clean.includes("'")) {
+                clean = clean.replace(/\s+/g, '').replace(/"/g, '').replace(/'/g, '-');
+            }
             return clean.trim();
         }
 
@@ -289,6 +314,7 @@
             populateEventSelector();
             document.getElementById('dashboardSection').classList.remove('hidden');
             document.getElementById('bulkWinnersContainer').classList.add('hidden');
+            updateScorePost();
         }
 
         function populateEventSelector() {
@@ -385,6 +411,26 @@
             counterEl.className = post.trim().length > 280 ? "text-xs font-mono px-2 py-0.5 bg-red-950 rounded text-red-400 font-bold" : "text-xs font-mono px-2 py-0.5 bg-gray-900 rounded text-gray-400";
         }
 
+        function updateScorePost() {
+            const gScore = document.getElementById('girlsScoreInput').value.trim();
+            const bScore = document.getElementById('boysScoreInput').value.trim();
+            const hashtag = document.getElementById('hashtagInput').value.trim();
+            const resultsUrl = document.getElementById('linkInput').value.trim();
+
+            let post = `🏆 Final Meet Scores! 🐾\n\n`;
+            if (gScore) post += `🏃‍♀️ Girls: ${gScore}\n`;
+            if (bScore) post += `🏃‍♂️ Boys: ${bScore}\n`;
+            if (!gScore && !bScore) post += `(Enter scores above to auto-compile layout)\n`;
+            
+            if (resultsUrl) post += `\n📊 Full Data: ${resultsUrl}\n`;
+            if (hashtag) post += (resultsUrl ? '' : '\n') + hashtag;
+
+            document.getElementById('outputScoreText').value = post.trim();
+            const cnt = document.getElementById('scoreCharCounter');
+            cnt.innerText = `${post.trim().length}/280`;
+            cnt.className = post.trim().length > 280 ? "absolute right-2 top-2 text-[10px] bg-red-950 px-1 rounded text-red-400 font-bold" : "absolute right-2 top-2 text-[10px] bg-gray-950 px-1 rounded text-gray-500 font-mono";
+        }
+
         function generateAllWinnersPosts() {
             const hashtag = document.getElementById('hashtagInput').value.trim();
             const resultsUrl = document.getElementById('linkInput').value.trim();
@@ -418,7 +464,6 @@
             
             allWinners.forEach((w) => {
                 let entryLine = `• ${w.event}: ${w.name} - ${w.mark}\n`;
-                // Build a strict check checking length limit constraints
                 let layoutTest = `${baseHeader} (9/9) 🐾\n\n🥇 1st Place Finishes:\n${currentBody}${entryLine}${footer}`;
                 
                 if (layoutTest.trim().length > 280 && currentBody !== "") {
@@ -456,12 +501,14 @@
 
             const baseLabel = buttonEl.innerText;
             buttonEl.innerText = "✅ Copied to Clipboard!";
-            buttonEl.className = buttonEl.className.replace('bg-emerald-600', 'bg-emerald-500').replace('bg-indigo-700', 'bg-emerald-500');
+            buttonEl.className = buttonEl.className.replace('bg-emerald-600', 'bg-emerald-500').replace('bg-indigo-700', 'bg-emerald-500').replace('bg-cyan-700', 'bg-emerald-500');
             
             setTimeout(() => {
                 buttonEl.innerText = baseLabel;
                 if(elementId === 'outputPostText') {
                     buttonEl.className = "w-full mt-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md";
+                } else if(elementId === 'outputScoreText') {
+                    buttonEl.className = "w-full mt-2 bg-cyan-700 hover:bg-cyan-600 text-white text-xs font-bold py-2 rounded uppercase tracking-wider shadow-sm";
                 } else {
                     buttonEl.className = "w-full bg-indigo-700 hover:bg-indigo-600 text-white text-[11px] font-bold py-1.5 rounded transition-all";
                 }
