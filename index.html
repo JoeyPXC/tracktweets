@@ -362,8 +362,8 @@
             if (/^Girls\s/i.test(clean)) { inferredGender = "Girls"; clean = clean.replace(/^Girls\s+/i, ""); }
             else if (/^Boys\s/i.test(clean))  { inferredGender = "Boys";  clean = clean.replace(/^Boys\s+/i,  ""); }
 
-            // Strip division markers BEFORE number-stripping regexes eat "Div 1" → "Div"
-            clean = clean.replace(/\s*Div(?:ision)?\s*\d+/gi, "");
+            // Strip division markers — both "Div 1" and "(Div 2)" styles
+            clean = clean.replace(/\s*\(?\s*Div(?:ision)?\s*\d+\s*\)?/gi, "");
 
             // Strip hurdle height markers like "39" / 0.991m" or "33" / 0.838m"
             clean = clean.replace(/\s*\d{2}["']\s*\/\s*[\d.]+m?\s*/g, " ");
@@ -392,10 +392,10 @@
             clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
             clean = clean.replace(/(\d+)\s*meter\s+Dash/gi, "$1m Dash");
             // Normalize relay names — replace any 4xNNN variant with clean "4xNNN Relay"
-            clean = clean.replace(/\b4\s*[xX]\s*100\b(\s*m)?(\s*Relay)?/gi, "4x100 Relay");
-            clean = clean.replace(/\b4\s*[xX]\s*200\b(\s*m)?(\s*Relay)?/gi, "4x200 Relay");
-            clean = clean.replace(/\b4\s*[xX]\s*400\b(\s*m)?(\s*Relay)?/gi, "4x400 Relay");
-            clean = clean.replace(/\b4\s*[xX]\s*800\b(\s*m)?(\s*Relay)?/gi, "4x800 Relay");
+            clean = clean.replace(/\b4\s*[xX]\s*100m?\b(\s*Relay)?/gi, "4x100 Relay");
+            clean = clean.replace(/\b4\s*[xX]\s*200m?\b(\s*Relay)?/gi, "4x200 Relay");
+            clean = clean.replace(/\b4\s*[xX]\s*400m?\b(\s*Relay)?/gi, "4x400 Relay");
+            clean = clean.replace(/\b4\s*[xX]\s*800m?\b(\s*Relay)?/gi, "4x800 Relay");
             // Deduplicate if "Relay Relay" somehow survived
             clean = clean.replace(/\bRelay\s+Relay\b/gi, 'Relay');
 
@@ -415,9 +415,9 @@
             }
 
             // Detect Engine Source Identity
-            // Athletic.LIVE check must come FIRST — its metadata lines contain "+10pts" and "Start Lists"
-            // which would otherwise false-match the MileSplit detector.
-            if (rawText.includes("AthleticLIVE") || rawText.includes("Yr:") || /•\s*\+\d+pts/i.test(rawText) || /•\s*H\d+\s*•/i.test(rawText)) {
+            // Normalize any bullet-like characters for detection
+            const rawForDetect = rawText.replace(/[•·●]/g, '•');
+            if (rawForDetect.includes("AthleticLIVE") || rawForDetect.includes("Yr:") || /•\s*\+\d+pts/i.test(rawForDetect) || /•\s*H\d+\s*•/i.test(rawForDetect) || /\+\d+pts/i.test(rawForDetect)) {
                 processAthleticLiveMobileData(rawText);
             } else if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top")) {
                 processMileSplitLiveData(rawText);
@@ -437,7 +437,7 @@
             const targetSchool = document.getElementById('schoolInput').value.trim();
             parsedMeetDatabase = {};
 
-            const lines = rawText.replace(/\r\n/g, '\n').split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const lines = rawText.replace(/\r\n/g, '\n').replace(/[•·●]/g, '•').split('\n').map(l => l.trim()).filter(l => l.length > 0);
             const schoolRegex = new RegExp(targetSchool.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
 
             let currentGenderSection = "Boys";
@@ -471,25 +471,77 @@
                     continue;
                 }
 
+                // Handle -- rank lines (DNF/DNS relays)
+                if (/^--$/.test(line)) {
+                    i++;
+                    continue;
+                }
+
                 // Rank line: a standalone integer
                 if (/^\d+$/.test(line)) {
                     let rank = parseInt(line);
                     let j = i + 1;
                     // Collect lines until the next standalone rank number or event header
                     let block = [];
-                    while (j < lines.length && !/^\d+$/.test(lines[j]) && !/^(boys|girls)\s+/i.test(lines[j])) {
+                    while (j < lines.length && !/^\d+$/.test(lines[j]) && !/^--$/.test(lines[j]) && !/^(boys|girls)\s+/i.test(lines[j])) {
                         block.push(lines[j]);
                         j++;
                     }
 
-                    // Athletic.LIVE block structure: [0]=name, [1]=team, [2]=time, [3]=metadata
-                    if (block.length >= 3) {
+                    const isRelayBlock = /relay/i.test(currentEventName);
+
+                    if (isRelayBlock && block.length >= 1) {
+                        // Athletic.LIVE relay structure — team is block[0].
+                        // Time may be standalone block[1] OR merged with metadata on same line.
+                        // Metadata format: "'A' • +10pts • H1 • Name1, Name2, ..."
+                        let teamName = block[0];
+                        let mark = '';
+                        let metadata = '';
+
+                        // Find which block line contains the time (a bare number like 47.97 or 1:29.21)
+                        // It could be block[1] alone, or merged at the start of a metadata line
+                        for (let b = 1; b < block.length; b++) {
+                            const timeMatch = block[b].match(/^(\d{1,2}(?::\d{2}(?:\.\d+)?|\.\d+))/);
+                            if (timeMatch) {
+                                mark = cleanPerformanceMark(timeMatch[1]);
+                                // Everything on this line after the time is metadata prefix
+                                metadata = block[b].slice(timeMatch[0].length).trim();
+                                // Append any remaining block lines to metadata
+                                for (let c = b + 1; c < block.length; c++) metadata += ' ' + block[c];
+                                break;
+                            } else {
+                                // This line is pre-time content (shouldn't happen but skip it)
+                                metadata += block[b] + ' ';
+                            }
+                        }
+
+                        let isPR = /\bPB\b|\bPR\b|\bSB\b/i.test(metadata);
+
+                        // Extract athlete names — everything after the last H\d heat marker bullet
+                        let athleteNames = '';
+                        const lastHeatMatch = metadata.match(/•\s*H\d+\s*•\s*(.+)$/);
+                        if (lastHeatMatch) {
+                            athleteNames = lastHeatMatch[1].trim();
+                        } else {
+                            // Fallback: everything after the last bullet
+                            const lastBullet = metadata.lastIndexOf('•');
+                            if (lastBullet >= 0) athleteNames = metadata.slice(lastBullet + 1).trim();
+                        }
+
+                        if (schoolRegex.test(teamName)) {
+                            parsedMeetDatabase[currentEventName].push({
+                                rank: rank,
+                                athleteName: athleteNames || teamName + ' Relay',
+                                mark: mark,
+                                isPR: isPR
+                            });
+                        }
+                    } else if (!isRelayBlock && block.length >= 3) {
+                        // Athletic.LIVE individual event structure: [0]=name, [1]=team, [2]=time, [3]=metadata
                         let athleteName = block[0];
                         let teamName    = block[1];
-                        let mark        = block[2].replace(/[^\d:.]/g, ''); // strip any non-time chars
+                        let mark        = block[2].replace(/[^\d:.]/g, '');
                         let metadata    = block[3] || '';
-
-                        // PR/SB/PB lives in the metadata line (e.g. "New '26 OH #8 PB • +10pts")
                         let isPR = /\bPB\b|\bPR\b|\bSB\b/i.test(metadata) || /\bPB\b|\bPR\b|\bSB\b/i.test(mark);
 
                         if (schoolRegex.test(teamName)) {
