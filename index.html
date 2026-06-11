@@ -19,7 +19,7 @@
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
                 ⚡ <span>TRACK SOCIAL MEDIA POST GENERATOR</span>
             </h1>
-            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">High-density meet data formatted instantly for social platforms. · v13</p>
+            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">Paste results from milesplit or athletic.net and generate content easily</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
@@ -159,7 +159,7 @@
                         <span class="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded font-semibold border border-gray-700">Supports Flat HTML, MileSplit & Athletic.net</span>
                     </div>
                     <textarea id="rawResults" rows="5" 
-                              placeholder="Paste Flat HTML or milesplit/anet results here... (Works directly from mobile browsers!)" 
+                              placeholder="Paste results from MileSplit or Athletic.net and generate content." 
                               onfocus="this.select()"
                               class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600 transition-all lg:h-40"></textarea>
                     
@@ -247,6 +247,17 @@
                             <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
                         </div>
                     </label>
+
+                    <!-- Relay Roster Editor: only visible for relay events -->
+                    <div id="relayRosterEditor" class="hidden bg-gray-900/70 rounded-xl border border-amber-500/40 p-3 space-y-2">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-bold uppercase tracking-wider text-amber-400">&#x1F504; Edit Relay Runners</span>
+                            <button onclick="clearRelayEdits()" class="text-[10px] text-gray-500 hover:text-red-400 font-semibold uppercase tracking-wide transition-colors">&#x2715; Clear Edits</button>
+                        </div>
+                        <p class="text-[10px] text-gray-500 leading-snug">Override parsed names &#8212; leave blank to keep original. Useful for MileSplit blanks, reordering legs, or substitutions.</p>
+                        <div id="relayRunnerInputs" class="grid grid-cols-2 gap-2"></div>
+                    </div>
+
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -469,6 +480,8 @@
             const rawForDetect = rawText.replace(/[•·●]/g, '•');
             if (rawForDetect.includes("AthleticLIVE") || rawForDetect.includes("Yr:") || /•\s*\+\d+pts/i.test(rawForDetect) || /•\s*H\d+\s*•/i.test(rawForDetect) || /\+\d+pts/i.test(rawForDetect)) {
                 processAthleticLiveMobileData(rawText);
+            } else if (rawText.includes("PLACE VIDEO ATHLETE TEAM MARK") || rawText.includes("PLACE VIDEO TEAM MARK HEAT")) {
+                processMileSplitFullData(rawText);
             } else if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top") || rawText.includes("powered by\nLive Scoreboard")) {
                 processMileSplitLiveData(rawText);
             } else {
@@ -553,6 +566,11 @@
                             const lastBullet = metadata.lastIndexOf('•');
                             if (lastBullet >= 0) athleteNames = metadata.slice(lastBullet + 1).trim();
                         }
+                        // Trim to first 4 runners (extras are alternates, not race participants)
+                        if (athleteNames) {
+                            const runnerParts = athleteNames.split(',').map(s => s.trim()).filter(Boolean);
+                            athleteNames = runnerParts.slice(0, 4).join(', ');
+                        }
 
                         if (schoolRegex.test(teamName)) {
                             parsedMeetDatabase[currentEventName].push({
@@ -581,6 +599,128 @@
                     i = j;
                     continue;
                 }
+                i++;
+            }
+
+            finalizeParsingSequence();
+        }
+
+        function processMileSplitFullData(rawText) {
+            const targetSchool = document.getElementById('schoolInput').value.trim();
+            parsedMeetDatabase = {};
+            const schoolRegex = new RegExp(targetSchool.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'i');
+
+            // Collapse \r\n, split into lines, keep blank lines for structure detection
+            const rawLines = rawText.replace(/\r\n/g, '\n').split('\n');
+
+            let currentGenderSection = "Boys";
+            let currentEventName = "";
+            let isRelayEvent = false;
+
+            // State machine: we look for event headers, skip column-header lines,
+            // then parse place-blocks (place line, optional blank, name line, data line).
+            let i = 0;
+            while (i < rawLines.length) {
+                const line = rawLines[i].trim();
+
+                // Skip column header lines
+                if (/^PLACE\s+VIDEO\s+(ATHLETE\s+)?TEAM\s+MARK/i.test(line)) { i++; continue; }
+
+                // Detect gender from event header
+                if (/^(Boys|Girls)\s+.*(Meter|Hurdles|Relay|Jump|Vault|Shot|Discus|Javelin)/i.test(line)) {
+                    currentGenderSection = /^Girls/i.test(line) ? "Girls" : "Boys";
+                    isRelayEvent = /relay/i.test(line);
+                    currentEventName = cleanEventTitle(line, currentGenderSection);
+                    if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
+                    i++;
+                    continue;
+                }
+
+                if (!currentEventName) { i++; continue; }
+
+                // Look for a place number on its own line
+                if (/^\d+$/.test(line)) {
+                    const rank = parseInt(line);
+                    i++;
+
+                    // Skip blank lines after place number
+                    while (i < rawLines.length && rawLines[i].trim() === '') i++;
+
+                    if (i >= rawLines.length) break;
+
+                    if (isRelayEvent) {
+                        // Relay format: team name on one line, then "mark heat" on next
+                        const teamLine = rawLines[i].trim();
+                        i++;
+                        while (i < rawLines.length && rawLines[i].trim() === '') i++;
+                        let mark = '';
+                        if (i < rawLines.length) {
+                            const dataLine = rawLines[i].trim();
+                            // dataLine is like "43.12 1" or "1:29.21 1"
+                            const markMatch = dataLine.match(/^(\d{1,2}(?::\d{2}(?:\.\d+)?|\.\d+))/);
+                            if (markMatch) mark = cleanPerformanceMark(markMatch[1]);
+                            i++;
+                        }
+                        if (schoolRegex.test(teamLine)) {
+                            parsedMeetDatabase[currentEventName].push({
+                                rank,
+                                athleteName: '', // no names available — relay editor will handle
+                                mark,
+                                isPR: false
+                            });
+                        }
+                    } else {
+                        // Individual: name on one line, then "grade school mark [wind] heat" on next
+                        const nameLine = rawLines[i].trim();
+                        i++;
+                        while (i < rawLines.length && rawLines[i].trim() === '') i++;
+                        if (i >= rawLines.length) break;
+                        const dataLine = rawLines[i].trim();
+                        i++;
+
+                        // dataLine: "12 Mass. Perry 11.10 2" or "12 Mass. Perry 1:57.54 1"
+                        // Extract mark: last token that looks like a time/distance before the final heat digit
+                        const parts = dataLine.split(/\s+/);
+                        // Find mark: scan from right, skip trailing single digit (heat), find time/distance
+                        let mark = '';
+                        let teamEndIdx = parts.length;
+                        for (let p = parts.length - 1; p >= 0; p--) {
+                            if (/^\d{1,3}(?::\d{2}(?:\.\d+)?|\.\d+|-\d+(?:\.\d+)?)$/.test(parts[p])) {
+                                mark = cleanPerformanceMark(parts[p]);
+                                teamEndIdx = p;
+                                break;
+                            }
+                        }
+                        // Everything from index 1 to teamEndIdx-1 is "grade school..."
+                        // index 0 is grade, 1..teamEndIdx-2 is school name (last token before mark is sometimes wind or heat)
+                        // Find school: skip grade (first token if it's 7-12), remaining before mark is school
+                        let schoolStr = '';
+                        let gradeStr = parts[0];
+                        if (/^(7|8|9|10|11|12)$/.test(gradeStr)) {
+                            // tokens 1 through teamEndIdx-1 is school (last one before mark may be wind reading — skip if it's a decimal like +1.2)
+                            let schoolParts = parts.slice(1, teamEndIdx);
+                            // Drop trailing wind reading if present (e.g. "-0.5", "+1.2", "2.1")
+                            if (schoolParts.length > 1 && /^[+-]?\d+\.\d+$/.test(schoolParts[schoolParts.length - 1])) {
+                                schoolParts = schoolParts.slice(0, -1);
+                            }
+                            schoolStr = schoolParts.join(' ');
+                        } else {
+                            // No grade — tokens before mark are school
+                            schoolStr = parts.slice(0, teamEndIdx).join(' ');
+                        }
+
+                        if (schoolRegex.test(schoolStr)) {
+                            parsedMeetDatabase[currentEventName].push({
+                                rank,
+                                athleteName: nameLine,
+                                mark,
+                                isPR: false
+                            });
+                        }
+                    }
+                    continue;
+                }
+
                 i++;
             }
 
@@ -811,7 +951,7 @@
             let processingText = cleanedDetails.replace(/^\d+\.\s+/, '');
             processingText = stripWindReadings(processingText);
             let loggedAsPR = /PB\b|PR\b|SB\b/i.test(processingText);
-            processingText = processingText.replace(/\s*(PR|PB|SB)\s*/i, '').trim();
+            processingText = processingText.replace(/\b(PR|PB|SB)\b/gi, '').replace(/\s+/g, ' ').trim();
             processingText = processingText.replace(/^([56789]|10|11|12)\s+/, '');
 
             const gradeSchoolMatch = processingText.match(/^(.+?)\s+(?:9|10|11|12)\s+.+?(\d[\d:\.]+)\s*$/);
@@ -909,15 +1049,20 @@
 
             const prAthletes = datasets.filter(item => item.isPR);
 
+            // Show/rebuild relay roster editor
+            updateRelayRosterEditor(selectedEvent, platformPlacements);
+
             let post = `🏁 ${selectedEvent} Results! 🐾\n\n`;
             
+            const isRelaySelected = /relay/i.test(selectedEvent);
             if (platformPlacements.length > 0) {
-                platformPlacements.forEach(runner => {
+                platformPlacements.forEach((runner, idx) => {
                     let medal = "• ";
                     if (runner.rank === 1) medal = "🥇 ";
                     if (runner.rank === 2) medal = "🥈 ";
                     if (runner.rank === 3) medal = "🥉 ";
-                    post += `${medal}${getOrdinalSuffix(runner.rank)}: ${runner.athleteName} - ${runner.mark}\n`;
+                    const displayName = isRelaySelected ? getRelayAthleteNameForPlacement(idx, runner.athleteName) : runner.athleteName;
+                    post += `${medal}${getOrdinalSuffix(runner.rank)}: ${displayName} - ${runner.mark}\n`;
                 });
             } else {
                 post += `No qualifying team placement scorers inside display range.\n`;
@@ -938,7 +1083,11 @@
             counterEl.innerText = `${post.trim().length}/280`;
             counterEl.className = post.trim().length > 280 ? "text-xs font-mono px-2 py-0.5 bg-red-950 rounded text-red-400 font-bold" : "text-xs font-mono px-2 py-0.5 bg-gray-900 rounded text-gray-400";
             
-            drawInstagramCanvas(selectedEvent, platformPlacements, showPR ? prAthletes : []);
+            // Apply relay editor overrides to the placements passed to the canvas
+            const canvasPlacements = isRelaySelected
+                ? platformPlacements.map((r, idx) => Object.assign({}, r, { athleteName: getRelayAthleteNameForPlacement(idx, r.athleteName) }))
+                : platformPlacements;
+            drawInstagramCanvas(selectedEvent, canvasPlacements, showPR ? prAthletes : []);
         }
 
         function syncColorFromPicker(which) {
@@ -1249,7 +1398,10 @@
             sortedEventNames.forEach(eventName => {
                 let items = parsedMeetDatabase[eventName] || [];
                 let winners = items.filter(a => a.rank === 1);
-                winners.forEach(w => { rawWinners.push({ event: eventName, name: w.athleteName, mark: w.mark }); });
+                winners.forEach(w => {
+                    const resolvedName = getResolvedRelayName(eventName, w.rank, w.athleteName);
+                    rawWinners.push({ event: eventName, name: resolvedName, mark: w.mark });
+                });
             });
 
             if(rawWinners.length === 0) {
@@ -1490,6 +1642,86 @@
             buttonEl.innerText = "✅ Copied!";
             setTimeout(() => { buttonEl.innerText = baseLabel; }, 1500);
         }
+
+        // == Relay Roster Editor =====================================================
+
+        // Returns the resolved relay athlete name for any event+rank combo.
+        // Used by both renderSocialPost (single event) and generateAllWinnersPosts (bulk).
+        function getResolvedRelayName(eventName, rank, fallback) {
+            if (!/relay/i.test(eventName)) return fallback;
+            // The relay editor is only populated for the currently selected event.
+            // If this event IS the selected event, we can use the indexed inputs.
+            const selectedEvent = document.getElementById('eventSelector').value;
+            if (eventName !== selectedEvent) return fallback;
+            // Find the placement index (position in the filtered placements array)
+            const datasets = parsedMeetDatabase[eventName] || [];
+            const placements = datasets.filter(item => item.rank <= currentPlacementCap);
+            const idx = placements.findIndex(p => p.rank === rank);
+            if (idx === -1) return fallback;
+            return getRelayAthleteNameForPlacement(idx, fallback);
+        }
+
+        // Shows/hides the editor and populates inputs when a relay event is chosen.
+        function updateRelayRosterEditor(selectedEvent, placements) {
+            const editorPanel = document.getElementById('relayRosterEditor');
+            const inputsContainer = document.getElementById('relayRunnerInputs');
+            const isRelay = /relay/i.test(selectedEvent);
+
+            if (!isRelay) {
+                editorPanel.classList.add('hidden');
+                return;
+            }
+
+            editorPanel.classList.remove('hidden');
+
+            // Only rebuild the inputs grid if the event changed (avoid losing typed values on re-render)
+            const currentKey = inputsContainer.dataset.eventKey || '';
+            if (currentKey === selectedEvent) return;
+            inputsContainer.dataset.eventKey = selectedEvent;
+            inputsContainer.innerHTML = '';
+
+            placements.forEach((runner, placementIdx) => {
+                const parsed = runner.athleteName.split(',').map(s => s.trim()).filter(Boolean);
+                if (placements.length > 1) {
+                    const hdr = document.createElement('div');
+                    hdr.className = 'col-span-2 text-[10px] font-bold text-amber-400/70 uppercase tracking-wider mt-1';
+                    hdr.textContent = getOrdinalSuffix(runner.rank) + ' Place Runners';
+                    inputsContainer.appendChild(hdr);
+                }
+                for (let leg = 0; leg < 4; leg++) {
+                    const placeholder = parsed[leg] || ('Leg ' + (leg + 1));
+                    const wrapper = document.createElement('div');
+                    wrapper.innerHTML = '<label class="block text-[10px] text-gray-500 mb-0.5 font-semibold">Leg ' + (leg+1) + '</label>' +
+                        '<input type="text" id="relayInput_' + placementIdx + '_' + leg + '" value="" placeholder="' + placeholder.replace(/"/g,'&quot;') + '" oninput="renderSocialPost()" class="w-full bg-gray-800 border border-gray-600 rounded px-2 py-1.5 text-xs text-white focus:outline-none focus:border-amber-400 placeholder-gray-600">';
+                    inputsContainer.appendChild(wrapper);
+                }
+            });
+        }
+
+        // Returns the (possibly user-edited) athlete name string for a relay placement.
+        function getRelayAthleteNameForPlacement(placementIdx, fallback) {
+            const parsed = fallback.split(',').map(s => s.trim()).filter(Boolean);
+            const overrides = [];
+            let anyFilled = false;
+            for (let leg = 0; leg < 4; leg++) {
+                const input = document.getElementById('relayInput_' + placementIdx + '_' + leg);
+                const val = input ? input.value.trim() : '';
+                if (val) anyFilled = true;
+                overrides.push(val || parsed[leg] || '');
+            }
+            if (!anyFilled) return fallback;
+            return overrides.filter(Boolean).join(', ');
+        }
+
+        function clearRelayEdits() {
+            const inputs = document.querySelectorAll('[id^="relayInput_"]');
+            inputs.forEach(inp => { inp.value = ''; });
+            // Reset event key so editor rebuilds with fresh placeholders
+            const container = document.getElementById('relayRunnerInputs');
+            if (container) container.dataset.eventKey = '';
+            renderSocialPost();
+        }
+        // ============================================================================
     </script>
 </body>
 </html>
