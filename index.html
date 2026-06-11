@@ -472,7 +472,7 @@
             } else if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top") || rawText.includes("powered by\nLive Scoreboard")) {
                 processMileSplitLiveData(rawText);
             } else {
-                processAthNetDesktopData(rawText);
+                processAthleticNetDesktopData(rawText);
             }
         }
 
@@ -552,14 +552,6 @@
                         } else {
                             const lastBullet = metadata.lastIndexOf('•');
                             if (lastBullet >= 0) athleteNames = metadata.slice(lastBullet + 1).trim();
-                        }
-
-                        // Cap relay roster names to first 4 legs
-                        if (athleteNames && athleteNames.includes(",")) {
-                            let legs = athleteNames.split(',').map(s => s.trim()).filter(Boolean);
-                            if (legs.length > 4) {
-                                athleteNames = legs.slice(0, 4).join(', ');
-                            }
                         }
 
                         if (schoolRegex.test(teamName)) {
@@ -682,14 +674,6 @@
                                 finalRosterString = parts.slice(1, parts.length - 1).join(", ");
                             }
 
-                            // STRIP DOWN TO JUST THE FIRST 4 RELAY LEGS HERE
-                            if (finalRosterString && finalRosterString.includes(",")) {
-                                let legsArray = finalRosterString.split(',').map(name => name.trim()).filter(Boolean);
-                                if (legsArray.length > 4) {
-                                    finalRosterString = legsArray.slice(0, 4).join(', ');
-                                }
-                            }
-
                             if (!finalRosterString) {
                                 finalRosterString = targetSchool + " Relay";
                             }
@@ -797,12 +781,6 @@
                                 if (ml) members.push(ml);
                             }
                         }
-                        
-                        // Cap relay roster names to first 4 legs
-                        if (members.length > 4) {
-                            members = members.slice(0, 4);
-                        }
-
                         const teamLabel = members.length > 0 ? members.join(', ') : (line.split(' - ')[0] + ' Relay');
                         parsedMeetDatabase[currentEventName].push({
                             rank,
