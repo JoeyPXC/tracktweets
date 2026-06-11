@@ -4,8 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Track Tweets & Grams Builder</title>
+    <title>Track Social Media Post Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght=700;900&family=Oswald:wght=500;700&family=Roboto+Mono:wght=700&display=swap" rel="stylesheet">
     <style>
         body { -webkit-tap-highlight-color: transparent; }
     </style>
@@ -16,31 +17,46 @@
         
         <header class="mb-5 text-center max-w-xl mx-auto">
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
-                ⚡ <span>TRACK TWEETS & GRAMS</span>
+                ⚡ <span>TRACK SOCIAL MEDIA POST GENERATOR</span>
             </h1>
-            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">High-density meet data formatted instantly for social platforms. · v6 (row logo sizing)</p>
+            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">High-density meet data formatted instantly for social platforms. · v13</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
             
-            <!-- Left Side Control Panel -->
             <div class="lg:col-span-5 space-y-4">
                 
-                <!-- Step 1: Configuration -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
-                    <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">1. Setup Filters</h2>
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400 mb-3">1. Setup Filters & Canvas Core</h2>
                     <div class="space-y-3">
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
-                                <label class="block text-xs font-semibold text-gray-400 mb-1">Your School Team</label>
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Your School Team (Filter)</label>
                                 <input type="text" id="schoolInput" value="" placeholder="e.g. Mass. Perry" 
                                        class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white">
                             </div>
                             <div>
-                                <label class="block text-xs font-semibold text-gray-400 mb-1">Hashtag / Subtitle</label>
-                                <input type="text" id="hashtagInput" value="" placeholder="e.g. #GoPanthers"  oninput="renderSocialPost(); updateScorePost();"
-                                       class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white">
+                                <label class="block text-xs font-semibold text-gray-400 mb-1">Graphic Display Name</label>
+                                <input type="text" id="displaySchoolInput" value="" oninput="renderSocialPost(); updateScorePost();" placeholder="e.g. Perry" 
+                                       class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white font-bold text-amber-400">
                             </div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Graphic Typography Profile</label>
+                            <select id="fontFamilySelector" onchange="renderSocialPost();" 
+                                    class="w-full bg-gray-900 border border-amber-500 rounded-lg px-3 py-2 text-sm focus:outline-none text-white font-semibold">
+                                <option value="sans-serif" selected>Modern Athletic (Sans-Serif Extra Bold)</option>
+                                <option value="'Oswald', sans-serif">Condensed Championship (Oswald Heavy)</option>
+                                <option value="'Roboto Mono', monospace">Slab Modernist (Roboto Mono / Tech)</option>
+                                <option value="'Cinzel', serif">Classic Elite (Cinzel Roman Trajan)</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-400 mb-1">Hashtag / Subtitle</label>
+                            <input type="text" id="hashtagInput" value="" placeholder="e.g. #GoPanthers"  oninput="renderSocialPost(); updateScorePost();"
+                                   class="w-full bg-gray-900 border border-gray-600 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-amber-400 text-white">
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-gray-400 mb-1">Meet Name <span class="text-[10px] text-gray-500 font-normal">(shown on graphics)</span></label>
@@ -56,9 +72,9 @@
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 mb-1">Accent Color</label>
                                 <div class="flex items-center gap-2">
-                                    <input type="color" id="accentColorPicker" value="#fbbf24" oninput="syncColorFromPicker('accent');"
+                                    <input type="color" id="accentColorPicker" value="#ffdd00" oninput="syncColorFromPicker('accent');"
                                            class="w-10 h-9 rounded cursor-pointer bg-gray-900 border border-gray-600 p-0.5">
-                                    <input type="text" id="accentColorHex" value="#fbbf24" maxlength="7" placeholder="#fbbf24"
+                                    <input type="text" id="accentColorHex" value="#ffdd00" maxlength="7" placeholder="#ffdd00"
                                            oninput="syncColorFromHex('accent');"
                                            class="flex-1 bg-gray-900 border border-gray-600 rounded px-2 py-1 text-xs font-mono text-amber-400 focus:outline-none focus:border-amber-400 w-20">
                                 </div>
@@ -74,6 +90,7 @@
                                 </div>
                             </div>
                         </div>
+                        
                         <div class="grid grid-cols-2 gap-3 pt-1">
                             <div>
                                 <label class="block text-xs font-semibold text-gray-400 mb-1">Logo — Top Left</label>
@@ -92,6 +109,25 @@
                                 </label>
                             </div>
                         </div>
+
+                        <div class="bg-gray-900/50 p-2.5 rounded-lg border border-gray-700/60 space-y-2">
+                            <div>
+                                <label class="block text-xs font-bold text-amber-400 uppercase tracking-wide">Background Watermark Logo</label>
+                                <label class="flex items-center justify-center gap-3 w-full h-12 bg-gray-900 border border-dashed border-amber-500/40 rounded-lg cursor-pointer hover:border-amber-400 transition-colors relative overflow-hidden px-3 mt-1">
+                                    <span id="logoBgLabel" class="text-[10px] text-gray-400">Upload Center Watermark</span>
+                                    <img id="logoBgPreview" class="hidden h-9 w-auto object-contain">
+                                    <input type="file" accept="image/*" class="hidden" onchange="handleLogoUpload(this, 'bgWatermark')">
+                                </label>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <label class="text-[10px] text-gray-400 font-semibold whitespace-nowrap">Watermark Opacity</label>
+                                <input type="range" id="logoBgOpacity" min="0" max="100" value="15" 
+                                       oninput="document.getElementById('logoBgOpacityVal').innerText = this.value + '%'; const sel = document.getElementById('eventSelector').value; if(sel) { renderSocialPost(); if(!document.getElementById('bulkWinnersContainer').classList.contains('hidden')) generateAllWinnersPosts(); }"
+                                       class="flex-1 accent-amber-500 h-1">
+                                <span id="logoBgOpacityVal" class="text-[10px] text-amber-400 font-mono w-8">15%</span>
+                            </div>
+                        </div>
+
                         <div>
                             <label class="block text-xs font-semibold text-gray-400 mb-1">Logo — Athlete Row <span class="text-[10px] text-gray-500 font-normal">(scoreboard bug next to name)</span></label>
                             <label class="flex items-center gap-3 w-full h-14 bg-gray-900 border border-dashed border-gray-600 rounded-lg cursor-pointer hover:border-amber-400 transition-colors relative overflow-hidden px-3">
@@ -117,20 +153,19 @@
                     </div>
                 </div>
 
-                <!-- Step 2: Paste Clipboard Text -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
                     <div class="flex justify-between items-center mb-2">
                         <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400">2. Paste Raw Meet Data</h2>
-                        <span class="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded font-semibold border border-gray-700">Supports Athletic.LIVE & MileSplit</span>
+                        <span class="text-[10px] text-gray-400 bg-gray-900 px-2 py-0.5 rounded font-semibold border border-gray-700">Supports Flat HTML, MileSplit & Athletic.net</span>
                     </div>
                     <textarea id="rawResults" rows="5" 
-                              placeholder="Copy from browser and paste here... (Works directly from mobile browsers!)" 
+                              placeholder="Paste Flat HTML or milesplit/anet results here... (Works directly from mobile browsers!)" 
                               onfocus="this.select()"
                               class="w-full bg-gray-900 border border-gray-600 rounded-lg p-3 text-xs font-mono focus:outline-none focus:border-amber-400 text-white placeholder-gray-600 transition-all lg:h-40"></textarea>
                     
                     <button onclick="processUniversalMeetData()" 
                             class="w-full mt-3 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold py-3 px-4 rounded-lg text-sm transition-colors uppercase tracking-wider shadow-md">
-                        Build Social Lists 📊
+                        Generate Content 📊
                     </button>
                     <button onclick="resetEverything()" 
                             class="w-full mt-2 bg-gray-700 hover:bg-red-900 border border-gray-600 hover:border-red-700 text-gray-400 hover:text-red-300 font-bold py-2 px-4 rounded-lg text-xs transition-colors uppercase tracking-wider">
@@ -138,7 +173,6 @@
                     </button>
                 </div>
 
-                <!-- Team Score Generator Card -->
                 <div id="scoreSection" class="hidden bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
                     <h2 class="text-xs font-bold uppercase tracking-wider text-cyan-400 mb-2">📢 Final Meet Score Generator</h2>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
@@ -166,10 +200,8 @@
 
             </div>
 
-            <!-- Right Side Dashboard -->
             <div id="dashboardSection" class="hidden lg:col-span-7 space-y-4">
                 
-                <!-- Step 3: Interactive Event Config -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg space-y-3">
                     <h2 class="text-xs font-bold uppercase tracking-wider text-amber-400">3. Select Event & Settings</h2>
                     
@@ -212,12 +244,11 @@
                         <span class="text-xs font-semibold text-gray-300">Include PR Roster at bottom</span>
                         <div class="relative">
                             <input type="checkbox" id="togglePR" onchange="renderSocialPost()" checked class="sr-only peer">
-                            <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                            <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
                         </div>
                     </label>
                 </div>
 
-                <!-- Combined Display Workspace -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     
                     <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg flex flex-col justify-between">
@@ -251,10 +282,18 @@
 
                 </div>
 
-                <!-- Bulk Team Winners Section -->
                 <div class="bg-gray-800 rounded-xl p-4 border border-gray-700 shadow-lg">
                     <h2 class="text-xs font-bold uppercase tracking-wider text-amber-500 mb-2">🏆 All-Meet Team Winners</h2>
                     <p class="text-[11px] text-gray-400 mb-3">Compiles every 1st place finisher from your team across the entire meet.</p>
+                    
+                    <label class="flex items-center justify-between p-2 mb-3 bg-gray-900 rounded-lg border border-gray-700 cursor-pointer select-none">
+                        <span class="text-xs font-semibold text-gray-300">Break down & group relay wins under individual athlete names</span>
+                        <div class="relative">
+                            <input type="checkbox" id="toggleConsolidateRelays" class="sr-only peer">
+                            <div class="w-9 h-5 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+                        </div>
+                    </label>
+
                     <button onclick="generateAllWinnersPosts()" 
                             class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-widest transition-all shadow-md">
                         ⚡ Generate Winners Content & Graphics
@@ -267,7 +306,6 @@
         </div>
     </div>
 
-    <!-- Core Parsing Logic Engine -->
     <script>
         let parsedMeetDatabase = {};
         let currentPlacementCap = 3; 
@@ -275,6 +313,7 @@
         let logoLeftImg = null;
         let logoRightImg = null;
         let logoRowImg = null;
+        let logoBgImg = null; 
 
         function handleLogoUpload(input, side) {
             const file = input.files[0];
@@ -293,26 +332,51 @@
                         document.getElementById('logoRowPreview').src = e.target.result;
                         document.getElementById('logoRowPreview').classList.remove('hidden');
                         document.getElementById('logoRowLabel').classList.add('hidden');
+                    } else if (side === 'bgWatermark') {
+                        logoBgImg = img;
+                        document.getElementById('logoBgPreview').src = e.target.result;
+                        document.getElementById('logoBgPreview').classList.remove('hidden');
+                        document.getElementById('logoBgLabel').classList.add('hidden');
                     } else {
                         logoRightImg = img;
                         document.getElementById('logoRightPreview').src = e.target.result;
                         document.getElementById('logoRightPreview').classList.remove('hidden');
                         document.getElementById('logoRightLabel').classList.add('hidden');
                     }
-                    // Redraw current canvas if event is already selected
                     const sel = document.getElementById('eventSelector').value;
-                    if (sel) renderSocialPost();
+                    if (sel) {
+                        renderSocialPost();
+                        if(!document.getElementById('bulkWinnersContainer').classList.contains('hidden')) {
+                            generateAllWinnersPosts();
+                        }
+                    }
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
         }
 
+        function drawWatermarkOnCanvas(ctx) {
+            if (!logoBgImg) return;
+            ctx.save();
+            const opacityVal = parseFloat(document.getElementById('logoBgOpacity').value) / 100;
+            ctx.globalAlpha = opacityVal;
+            
+            const targetSize = 650; 
+            const ratio = Math.min(targetSize / logoBgImg.width, targetSize / logoBgImg.height);
+            const w = logoBgImg.width * ratio;
+            const h = logoBgImg.height * ratio;
+            const x = (1080 - w) / 2;
+            const y = (1080 - h) / 2 + 50; 
+            
+            ctx.drawImage(logoBgImg, x, y, w, h);
+            ctx.restore();
+        }
+
         function drawLogosOnCanvas(ctx) {
             const logoSize = 130;
             const pad = 20;
             if (logoLeftImg) {
-                // Draw with contain-fit into a square box, maintaining aspect ratio
                 const ratio = Math.min(logoSize / logoLeftImg.width, logoSize / logoLeftImg.height);
                 const w = logoLeftImg.width * ratio;
                 const h = logoLeftImg.height * ratio;
@@ -357,22 +421,15 @@
             let clean = rawTitle.trim();
             let isWheelchair = /wheelchair|wc\b/i.test(clean);
 
-            // Extract leading gender prefix first to avoid double-prepend (e.g. "Boys Boys 400m")
             let inferredGender = genderSection;
             if (/^Girls\s/i.test(clean)) { inferredGender = "Girls"; clean = clean.replace(/^Girls\s+/i, ""); }
             else if (/^Boys\s/i.test(clean))  { inferredGender = "Boys";  clean = clean.replace(/^Boys\s+/i,  ""); }
 
-            // Strip division markers — both "Div 1" and "(Div 2)" styles
             clean = clean.replace(/\s*\(?\s*Div(?:ision)?\s*\d+\s*\)?/gi, "");
-
-            // Strip hurdle height markers like "39" / 0.991m" or "33" / 0.838m"
             clean = clean.replace(/\s*\d{2}["']\s*\/\s*[\d.]+m?\s*/g, " ");
-            // Also strip any bare inch markers remaining
             clean = clean.replace(/\s*\d{2}["']\s*/g, " ");
-            // Strip any remaining "/ 0.991m" style fragments
             clean = clean.replace(/\s*\/\s*[\d.]+\s*m?\s*/g, " ");
 
-            // Strip common suffixes
             clean = clean
                 .replace(/\s*Varsity\s*-\s*Finals/gi, "")
                 .replace(/\s*Wheelchair\s*-\s*Finals/gi, "")
@@ -382,21 +439,17 @@
                 .replace(/\s*Wheelchair/gi, "")
                 .trim();
 
-            // Strip trailing weight/distance/implement markers
             clean = clean.replace(/\s*-\s*\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?/gi, "");
             clean = clean.replace(/\s+\d+(\.\d+)?\s*(lb|kg|oz|g|m|")?$/gi, "");
             clean = clean.replace(/\s*-\s*$/g, "").trim();
             clean = clean.replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "");
 
-            // Normalize event name formats
             clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
             clean = clean.replace(/(\d+)\s*meter\s+Dash/gi, "$1m Dash");
-            // Normalize relay names — replace any 4xNNN variant with clean "4xNNN Relay"
             clean = clean.replace(/\b4\s*[xX]\s*100m?\b(\s*Relay)?/gi, "4x100 Relay");
             clean = clean.replace(/\b4\s*[xX]\s*200m?\b(\s*Relay)?/gi, "4x200 Relay");
             clean = clean.replace(/\b4\s*[xX]\s*400m?\b(\s*Relay)?/gi, "4x400 Relay");
             clean = clean.replace(/\b4\s*[xX]\s*800m?\b(\s*Relay)?/gi, "4x800 Relay");
-            // Deduplicate if "Relay Relay" somehow survived
             clean = clean.replace(/\bRelay\s+Relay\b/gi, 'Relay');
 
             let baseTitle = `${inferredGender} ${clean}`.replace(/\s+/g, ' ').trim();
@@ -406,7 +459,6 @@
             return baseTitle;
         }
 
-        // UNIVERSAL PROCESSING DISPATCH ENGINE
         function processUniversalMeetData() {
             const rawText = document.getElementById('rawResults').value.trim();
             if (!rawText) {
@@ -414,25 +466,16 @@
                 return;
             }
 
-            // Detect Engine Source Identity
-            // Normalize any bullet-like characters for detection
             const rawForDetect = rawText.replace(/[•·●]/g, '•');
             if (rawForDetect.includes("AthleticLIVE") || rawForDetect.includes("Yr:") || /•\s*\+\d+pts/i.test(rawForDetect) || /•\s*H\d+\s*•/i.test(rawForDetect) || /\+\d+pts/i.test(rawForDetect)) {
                 processAthleticLiveMobileData(rawText);
-            } else if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top")) {
+            } else if (rawText.includes("pts") || rawText.includes("Start Lists") || rawText.includes("OH Top") || rawText.includes("powered by\nLive Scoreboard")) {
                 processMileSplitLiveData(rawText);
             } else {
-                processAthleticNetDesktopData(rawText);
+                processAthNetDesktopData(rawText);
             }
         }
 
-        // ENGINE: ATHLETIC.LIVE PARSER
-        // Athletic.LIVE result blocks look like:
-        //   <rank>
-        //   <Athlete Name>
-        //   <Team Name>
-        //   <Time/Mark>
-        //   <Metadata: "New '26 OH #8 PB • +10pts • H1 • #1729 • Yr: 10">  (optional)
         function processAthleticLiveMobileData(rawText) {
             const targetSchool = document.getElementById('schoolInput').value.trim();
             parsedMeetDatabase = {};
@@ -443,8 +486,6 @@
             let currentGenderSection = "Boys";
             let currentEventName = "Unknown Event";
 
-            // Scan headers to find event name and gender
-            // Skip Athletic.LIVE UI/nav lines that contain event keywords but aren't the result header
             const skipNavLine = /^(results|prelims|entries|start lists|records|schedule|official|finals|division|type|live|events|follow|teams|athletes|scores|home|dark|light|winners|mvp|location|search|features|about|links|contact|timers|meet directors|parents|coaches|version)$/i;
             for (let i = 0; i < Math.min(lines.length, 40); i++) {
                 if (skipNavLine.test(lines[i])) continue;
@@ -462,7 +503,6 @@
             while (i < lines.length) {
                 let line = lines[i];
 
-                // Catch event header shifts mid-paste (e.g. "Boys 400m Div 1 Finals")
                 if (/^(boys|girls)\s+/i.test(line) && /\d+m|dash|hurdles|relay|run|shot|discus|vault|jump/i.test(line)) {
                     currentGenderSection = /girls/i.test(line) ? "Girls" : "Boys";
                     currentEventName = cleanEventTitle(line, currentGenderSection);
@@ -471,17 +511,14 @@
                     continue;
                 }
 
-                // Handle -- rank lines (DNF/DNS relays)
                 if (/^--$/.test(line)) {
                     i++;
                     continue;
                 }
 
-                // Rank line: a standalone integer
                 if (/^\d+$/.test(line)) {
                     let rank = parseInt(line);
                     let j = i + 1;
-                    // Collect lines until the next standalone rank number or event header
                     let block = [];
                     while (j < lines.length && !/^\d+$/.test(lines[j]) && !/^--$/.test(lines[j]) && !/^(boys|girls)\s+/i.test(lines[j])) {
                         block.push(lines[j]);
@@ -491,41 +528,38 @@
                     const isRelayBlock = /relay/i.test(currentEventName);
 
                     if (isRelayBlock && block.length >= 1) {
-                        // Athletic.LIVE relay structure — team is block[0].
-                        // Time may be standalone block[1] OR merged with metadata on same line.
-                        // Metadata format: "'A' • +10pts • H1 • Name1, Name2, ..."
                         let teamName = block[0];
                         let mark = '';
                         let metadata = '';
 
-                        // Find which block line contains the time (a bare number like 47.97 or 1:29.21)
-                        // It could be block[1] alone, or merged at the start of a metadata line
                         for (let b = 1; b < block.length; b++) {
                             const timeMatch = block[b].match(/^(\d{1,2}(?::\d{2}(?:\.\d+)?|\.\d+))/);
                             if (timeMatch) {
                                 mark = cleanPerformanceMark(timeMatch[1]);
-                                // Everything on this line after the time is metadata prefix
                                 metadata = block[b].slice(timeMatch[0].length).trim();
-                                // Append any remaining block lines to metadata
                                 for (let c = b + 1; c < block.length; c++) metadata += ' ' + block[c];
                                 break;
                             } else {
-                                // This line is pre-time content (shouldn't happen but skip it)
                                 metadata += block[b] + ' ';
                             }
                         }
 
                         let isPR = /\bPB\b|\bPR\b|\bSB\b/i.test(metadata);
-
-                        // Extract athlete names — everything after the last H\d heat marker bullet
                         let athleteNames = '';
                         const lastHeatMatch = metadata.match(/•\s*H\d+\s*•\s*(.+)$/);
                         if (lastHeatMatch) {
                             athleteNames = lastHeatMatch[1].trim();
                         } else {
-                            // Fallback: everything after the last bullet
                             const lastBullet = metadata.lastIndexOf('•');
                             if (lastBullet >= 0) athleteNames = metadata.slice(lastBullet + 1).trim();
+                        }
+
+                        // Cap relay roster names to first 4 legs
+                        if (athleteNames && athleteNames.includes(",")) {
+                            let legs = athleteNames.split(',').map(s => s.trim()).filter(Boolean);
+                            if (legs.length > 4) {
+                                athleteNames = legs.slice(0, 4).join(', ');
+                            }
                         }
 
                         if (schoolRegex.test(teamName)) {
@@ -537,7 +571,6 @@
                             });
                         }
                     } else if (!isRelayBlock && block.length >= 3) {
-                        // Athletic.LIVE individual event structure: [0]=name, [1]=team, [2]=time, [3]=metadata
                         let athleteName = block[0];
                         let teamName    = block[1];
                         let mark        = block[2].replace(/[^\d:.]/g, '');
@@ -562,7 +595,6 @@
             finalizeParsingSequence();
         }
 
-        // PARSING ENGINE: MILESPLIT LIVE
         function processMileSplitLiveData(rawText) {
             const targetSchool = document.getElementById('schoolInput').value.trim();
             parsedMeetDatabase = {};
@@ -571,7 +603,7 @@
             let currentGenderSection = "Boys";
             let currentEventName = "Unknown Event";
 
-            for(let i=0; i<Math.min(lines.length, 12); i++){
+            for(let i=0; i<Math.min(lines.length, 25); i++){
                 let headerLine = lines[i];
                 if(/Girls|Womens/i.test(headerLine)) currentGenderSection = "Girls";
                 if(/Boys|Mens/i.test(headerLine)) currentGenderSection = "Boys";
@@ -599,46 +631,108 @@
                     let extractedPlace = parseInt(placeMatch[1]);
                     let pointer = i + 1;
                     let blockLines = [];
-                    while(pointer < lines.length && blockLines.length < 8) {
+                    
+                    while(pointer < lines.length) {
                         if (/^\d+\s*$/.test(lines[pointer])) break;
-                        if (/\b(Boys|Girls)\b/i.test(lines[pointer]) && pointer > i + 3) break;
+                        if (/\b(Boys|Girls)\b/i.test(lines[pointer]) && blockLines.length > 3) break;
+                        if (lines[pointer].includes("Related News") || lines[pointer].includes("Last Updated:")) break;
                         blockLines.push(lines[pointer]);
                         pointer++;
                     }
 
                     let completeBlockString = blockLines.join(" ");
-                    completeBlockString = completeBlockString.replace(/\d+\s*pts\s*/gi, "").replace(/OH\s+Top\s+\d+/gi, "").replace(/\s*\*\s*/g, "");
-
+                    
                     if (schoolRegex.test(completeBlockString)) {
-                        let parts = completeBlockString.split(/\s+/);
-                        let yearIndex = parts.findIndex(p => /^(10|11|12|9|8|7)$/.test(p));
-                        let athleteName = "";
-                        let teamName = "";
-                        let mark = "";
-                        let isPR = completeBlockString.includes("PR") || completeBlockString.includes("PB");
-
-                        if (yearIndex !== -1) {
-                            athleteName = parts.slice(0, yearIndex).join(" ");
-                            let timeIndex = parts.findIndex((p, idx) => idx > yearIndex && /^\d{1,2}\.\d{2}$/.test(p));
-                            if (timeIndex !== -1) {
-                                teamName = parts.slice(yearIndex + 1, timeIndex).join(" ");
-                                mark = parts[timeIndex];
-                            } else {
-                                teamName = parts.slice(yearIndex + 1, parts.length - 1).join(" ");
-                                mark = parts[parts.length - 1];
+                        const isRelayEvent = /relay/i.test(currentEventName);
+                        
+                        if (isRelayEvent) {
+                            let ptsRemoved = completeBlockString.replace(/\d+\s*pts\s*/gi, "").trim();
+                            
+                            let timeIndex = -1;
+                            let parts = ptsRemoved.split(/\s+/);
+                            for (let p = parts.length - 1; p >= 0; p--) {
+                                if (/^\d{1,2}:\d{2}\.\d{2}$|^\d{1,2}\.\d{2}$/.test(parts[p])) {
+                                    timeIndex = p;
+                                    break;
+                                }
                             }
-                        } else {
-                            athleteName = parts.slice(0, 2).join(" ");
-                            mark = parts[parts.length - 1];
-                            teamName = parts.slice(2, parts.length - 1).join(" ");
-                        }
+                            
+                            let mark = "";
+                            let finalRosterString = "";
+                            
+                            if (timeIndex !== -1) {
+                                mark = parts[timeIndex];
+                                let beforeTimeParts = parts.slice(0, timeIndex);
+                                let teamLabelStr = "";
+                                for (let k = 0; k < beforeTimeParts.length; k++) {
+                                    teamLabelStr += (teamLabelStr ? " " : "") + beforeTimeParts[k];
+                                    if (schoolRegex.test(teamLabelStr)) {
+                                        let possibleQuotes = beforeTimeParts[k+1];
+                                        if (possibleQuotes && /^["'][A-Z]["']$/i.test(possibleQuotes)) {
+                                            teamLabelStr += " " + possibleQuotes;
+                                            k++;
+                                        }
+                                        let namesArray = beforeTimeParts.slice(k + 1);
+                                        finalRosterString = namesArray.join(", ");
+                                        break;
+                                    }
+                                }
+                            } else {
+                                mark = parts[parts.length - 1];
+                                finalRosterString = parts.slice(1, parts.length - 1).join(", ");
+                            }
 
-                        parsedMeetDatabase[currentEventName].push({
-                            rank: extractedPlace,
-                            athleteName: athleteName.trim(),
-                            mark: cleanPerformanceMark(mark),
-                            isPR: isPR
-                        });
+                            // STRIP DOWN TO JUST THE FIRST 4 RELAY LEGS HERE
+                            if (finalRosterString && finalRosterString.includes(",")) {
+                                let legsArray = finalRosterString.split(',').map(name => name.trim()).filter(Boolean);
+                                if (legsArray.length > 4) {
+                                    finalRosterString = legsArray.slice(0, 4).join(', ');
+                                }
+                            }
+
+                            if (!finalRosterString) {
+                                finalRosterString = targetSchool + " Relay";
+                            }
+
+                            parsedMeetDatabase[currentEventName].push({
+                                rank: extractedPlace,
+                                athleteName: finalRosterString,
+                                mark: cleanPerformanceMark(mark),
+                                isPR: ptsRemoved.includes("PR") || ptsRemoved.includes("PB")
+                            });
+
+                        } else {
+                            let cleanedStr = completeBlockString.replace(/\d+\s*pts\s*/gi, "").replace(/OH\s+Top\s+\d+/gi, "").replace(/\s*\*\s*/g, "");
+                            let parts = cleanedStr.split(/\s+/);
+                            let yearIndex = parts.findIndex(p => /^(10|11|12|9|8|7)$/.test(p));
+                            let athleteName = "";
+                            let teamName = "";
+                            let mark = "";
+                            let isPR = cleanedStr.includes("PR") || cleanedStr.includes("PB");
+
+                            if (yearIndex !== -1) {
+                                athleteName = parts.slice(0, yearIndex).join(" ");
+                                let timeIndex = parts.findIndex((p, idx) => idx > yearIndex && /^\d{1,2}\.\d{2}$/.test(p));
+                                if (timeIndex !== -1) {
+                                    teamName = parts.slice(yearIndex + 1, timeIndex).join(" ");
+                                    mark = parts[timeIndex];
+                                } else {
+                                    teamName = parts.slice(yearIndex + 1, parts.length - 1).join(" ");
+                                    mark = parts[parts.length - 1];
+                                }
+                            } else {
+                                athleteName = parts.slice(0, 2).join(" ");
+                                mark = parts[parts.length - 1];
+                                teamName = parts.slice(2, parts.length - 1).join(" ");
+                            }
+
+                            parsedMeetDatabase[currentEventName].push({
+                                rank: extractedPlace,
+                                athleteName: athleteName.trim(),
+                                mark: cleanPerformanceMark(mark),
+                                isPR: isPR
+                            });
+                        }
                     }
                     i = pointer - 1;
                 }
@@ -646,7 +740,6 @@
             finalizeParsingSequence();
         }
 
-        // PARSING ENGINE: ATHLETIC.NET DESKTOP ARCHIVE
         function processAthleticNetDesktopData(rawText) {
             const targetSchool = document.getElementById('schoolInput').value.trim();
             parsedMeetDatabase = {};
@@ -671,7 +764,7 @@
                 if (line.includes("Varsity") || line.includes("Relay") || line.includes("Wheelchair") || line.includes("Meters") || line.includes("WC") || line.includes("Hurdles")) {
                     if (line.includes("Results")) continue; 
                     if (/^\d+\./.test(line)) continue;
-                    if (/^--/.test(line)) continue; // skip DNS/DQ placeholder lines like "-- Relay Team"
+                    if (/^--/.test(line)) continue;
                     currentEventName = cleanEventTitle(line, currentGenderSection);
                     if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
                     continue;
@@ -682,14 +775,6 @@
                     const isRelayEvent = /relay/i.test(currentEventName);
 
                     if (isRelayEvent) {
-                        // Relay block structure (athletic.net):
-                        //   rank.         ← standalone "1."
-                        //   grade         ← "11"
-                        //   name          ← "Julius Donald"
-                        //   ... (more legs)
-                        //   time          ← "3:18.82a"   ← lines[i-1]
-                        //   school - X    ← lines[i]  ← we are here
-                        // Scan back to find the rank line (starts with digits and a dot)
                         let mark = lines[i-1] ? lines[i-1].trim().replace(/[a-zA-Z]$/, '') : '';
                         let rank = 99;
                         for (let back = i - 2; back >= Math.max(0, i - 20); back--) {
@@ -698,7 +783,6 @@
                                 break;
                             }
                         }
-                        // Collect member names (lines between rank and time — skip grade lines)
                         let members = [];
                         let rankLineIdx = -1;
                         for (let back = i - 2; back >= Math.max(0, i - 20); back--) {
@@ -707,12 +791,18 @@
                         if (rankLineIdx >= 0) {
                             for (let m = rankLineIdx + 1; m < i - 1; m++) {
                                 const ml = lines[m].trim();
-                                if (/^\d{1,2}$/.test(ml)) continue; // skip grade lines
-                                if (/^\d{1,2}:\d{2}/.test(ml)) continue; // skip split times like 2:04.3h
-                                if (/^\d{1,2}\.\d/.test(ml)) continue; // skip decimal split times
+                                if (/^\d{1,2}$/.test(ml)) continue; 
+                                if (/^\d{1,2}:\d{2}/.test(ml)) continue; 
+                                if (/^\d{1,2}\.\d/.test(ml)) continue; 
                                 if (ml) members.push(ml);
                             }
                         }
+                        
+                        // Cap relay roster names to first 4 legs
+                        if (members.length > 4) {
+                            members = members.slice(0, 4);
+                        }
+
                         const teamLabel = members.length > 0 ? members.join(', ') : (line.split(' - ')[0] + ' Relay');
                         parsedMeetDatabase[currentEventName].push({
                             rank,
@@ -744,24 +834,17 @@
             processingText = stripWindReadings(processingText);
             let loggedAsPR = /PB\b|PR\b|SB\b/i.test(processingText);
             processingText = processingText.replace(/\s*(PR|PB|SB)\s*/i, '').trim();
-            // Strip leading grade (9-12)
             processingText = processingText.replace(/^([56789]|10|11|12)\s+/, '');
 
-            // Name is everything up to the first grade/year token (9-12) followed by school+mark
-            // Pattern: "FirstName LastName 11 School Name 11.95"
-            // Split on the first occurrence of a grade number surrounded by spaces
             const gradeSchoolMatch = processingText.match(/^(.+?)\s+(?:9|10|11|12)\s+.+?(\d[\d:\.]+)\s*$/);
             let namePart, markPart;
             if (gradeSchoolMatch) {
                 namePart = gradeSchoolMatch[1].trim();
                 markPart = gradeSchoolMatch[2].trim();
             } else {
-                // Fallback: name is text before the first digit sequence that looks like a time/mark
                 const markMatch = processingText.match(/^(.*?)\s+(\d[\d:\.\-]+(?:\.\d+)?)\s*$/);
                 if (markMatch) {
-                    // Strip trailing school words (non-time content after last space-separated chunk)
                     const parts = markMatch[1].trim().split(/\s+/);
-                    // Heuristic: school names often follow the athlete name — keep only first 2-3 tokens as name
                     namePart = parts.slice(0, Math.min(parts.length, 3)).join(' ');
                     markPart = markMatch[2].trim();
                 } else {
@@ -774,6 +857,12 @@
         }
 
         function finalizeParsingSequence() {
+            const rawSchool = document.getElementById('schoolInput').value.trim();
+            const displaySchool = document.getElementById('displaySchoolInput').value.trim();
+            if(rawSchool && !displaySchool) {
+                document.getElementById('displaySchoolInput').value = rawSchool;
+            }
+
             populateEventSelector();
             document.getElementById('dashboardSection').classList.remove('hidden');
             document.getElementById('scoreSection').classList.remove('hidden');
@@ -835,7 +924,11 @@
             const datasets = parsedMeetDatabase[selectedEvent] || [];
             datasets.sort((a, b) => a.rank - b.rank);
 
-            const platformPlacements = datasets.filter(item => item.rank <= currentPlacementCap);
+            let platformPlacements = datasets.filter(item => item.rank <= currentPlacementCap);
+            if (/relay/i.test(selectedEvent) && currentPlacementCap === 3) {
+                platformPlacements = platformPlacements.filter(item => item.rank === 1);
+            }
+
             const prAthletes = datasets.filter(item => item.isPR);
 
             let post = `🏁 ${selectedEvent} Results! 🐾\n\n`;
@@ -849,7 +942,7 @@
                     post += `${medal}${getOrdinalSuffix(runner.rank)}: ${runner.athleteName} - ${runner.mark}\n`;
                 });
             } else {
-                post += `No qualifying team placement scorers inside Top ${currentPlacementCap}.\n`;
+                post += `No qualifying team placement scorers inside display range.\n`;
             }
 
             if (showPR && prAthletes.length > 0) {
@@ -881,45 +974,58 @@
             const hex = document.getElementById(which === 'accent' ? 'accentColorHex' : 'bgColorHex');
             const picker = document.getElementById(which === 'accent' ? 'accentColorPicker' : 'bgColorPicker');
             const val = hex.value.trim();
-            // Accept partial typing — only update picker when valid 7-char hex
             if (/^#[0-9a-fA-F]{6}$/.test(val)) {
                 picker.value = val;
                 renderSocialPost(); updateScorePost();
             }
         }
 
-        function getAccentColor() { return document.getElementById('accentColorPicker') ? document.getElementById('accentColorPicker').value : '#fbbf24'; }
+        function getAccentColor() { return document.getElementById('accentColorPicker') ? document.getElementById('accentColorPicker').value : '#ffdd00'; }
         function getBgColor() { return document.getElementById('bgColorPicker') ? document.getElementById('bgColorPicker').value : '#000000'; }
         function stripGender(name) { return name.replace(/^(Girls|Boys)\s+/i, '').trim(); }
+        
+        function getSchoolDisplayName() {
+            const customDisplay = document.getElementById('displaySchoolInput').value.trim();
+            if (customDisplay) return customDisplay.toUpperCase();
+            return document.getElementById('schoolInput').value.trim().toUpperCase();
+        }
+
+        function getSelectedFontFamily() {
+            return document.getElementById('fontFamilySelector').value;
+        }
 
         function drawInstagramCanvas(eventName, placements, prList) {
             const canvas = document.getElementById('instagramCanvas');
             const ctx = canvas.getContext('2d');
-            const schoolName = document.getElementById('schoolInput').value.trim().toUpperCase();
+            const schoolName = getSchoolDisplayName();
             const subtitle = document.getElementById('hashtagInput').value.trim();
             const meetName = document.getElementById('meetNameInput') ? document.getElementById('meetNameInput').value.trim().toUpperCase() : '';
             const accentColor = getAccentColor();
             const bgColor = getBgColor();
             const displayEventName = stripGender(eventName).toUpperCase();
+            const chosenFont = getSelectedFontFamily();
 
             ctx.fillStyle = bgColor; 
             ctx.fillRect(0, 0, 1080, 1080);
+
+            drawWatermarkOnCanvas(ctx);
+
             ctx.fillStyle = accentColor; 
             ctx.fillRect(0, 0, 1080, 40);
 
             ctx.fillStyle = '#ffffff'; 
-            ctx.font = '900 32px sans-serif';
+            ctx.font = `900 32px ${chosenFont}`;
             ctx.textAlign = 'center';
             ctx.fillText(schoolName + " TRACK & FIELD", 540, 90);
 
             if (meetName) {
                 ctx.fillStyle = accentColor;
-                ctx.font = 'bold 22px sans-serif';
+                ctx.font = `bold 22px ${chosenFont}`;
                 ctx.fillText(meetName, 540, 125);
             }
 
             const titleY = meetName ? 210 : 200;
-            ctx.font = '900 68px sans-serif';
+            ctx.font = `900 68px ${chosenFont}`;
             ctx.lineWidth = 14;
             ctx.strokeStyle = bgColor;
             ctx.strokeText(displayEventName, 540, titleY);
@@ -949,17 +1055,14 @@
                     ctx.fillRect(140, rowY - 50, 15, rowBoxH);
 
                     ctx.fillStyle = '#a1a1aa'; 
-                    ctx.font = 'bold 36px sans-serif';
+                    ctx.font = `bold 36px ${chosenFont}`;
                     ctx.textAlign = 'left';
                     const rankTextY = isRelayEvent ? rowY + 2 + 10 : rowY + 6;
                     ctx.fillText(getOrdinalSuffix(runner.rank), 180, rankTextY);
 
-                    // Row logo: sits right after rank text, before athlete name
-                    // Rank text ends around x=255 for widest case ("8th"), logo starts at 258
                     let nameX = 310;
                     if (logoRowImg) {
                         const rowLogoMaxH = parseInt(document.getElementById('logoRowSize').value) || 52;
-                        // For wide logos, also cap by a max width so it doesn't eat into name space
                         const rowLogoMaxW = 120;
                         const ratio = Math.min(rowLogoMaxH / logoRowImg.height, rowLogoMaxW / logoRowImg.width);
                         const lw = logoRowImg.width * ratio;
@@ -972,62 +1075,68 @@
 
                     ctx.fillStyle = '#ffffff';
                     const isRelay = /relay/i.test(eventName);
-                    // Measure time width so name never overlaps it
                     ctx.font = 'bold 40px monospace';
                     const timeWidth = ctx.measureText(runner.mark).width;
-                    const rightBoundary = 910 - timeWidth - 24; // 24px gap between name and time
+                    const rightBoundary = 910 - timeWidth - 24; 
+
                     if (isRelay) {
-                        // Split comma-separated relay members into two rows
                         const members = runner.athleteName.split(',').map(s => s.trim()).filter(Boolean);
-                        const half = Math.ceil(members.length / 2);
-                        const row1 = members.slice(0, half).join(', ');
-                        const row2 = members.slice(half).join(', ');
-                        // Shrink font so each row fits in available width
-                        const maxRelayW = rightBoundary - nameX;
-                        let relayFontSize = 24;
-                        ctx.font = `700 ${relayFontSize}px sans-serif`;
-                        const longerRow = row1.length >= row2.length ? row1 : row2;
-                        while (ctx.measureText(longerRow).width > maxRelayW && relayFontSize > 11) {
-                            relayFontSize -= 1;
-                            ctx.font = `700 ${relayFontSize}px sans-serif`;
+                        let row1 = "";
+                        let row2 = "";
+                        
+                        if(members.length <= 2) {
+                            row1 = members.join(', ');
+                        } else {
+                            const half = Math.ceil(members.length / 2);
+                            row1 = members.slice(0, half).join(', ') + ",";
+                            row2 = members.slice(half).join(', ');
                         }
+
+                        const maxRelayW = rightBoundary - nameX;
+                        let relayFontSize = 26;
+                        ctx.font = `700 ${relayFontSize}px ${chosenFont}`;
+                        const longerRow = row1.length >= row2.length ? row1 : row2;
+                        
+                        while (ctx.measureText(longerRow).width > maxRelayW && relayFontSize > 12) {
+                            relayFontSize -= 1;
+                            ctx.font = `700 ${relayFontSize}px ${chosenFont}`;
+                        }
+                        
                         const lineGap = relayFontSize + 6;
-                        // Center both lines within the box (box top = rowY-50, height = rowBoxH)
                         const boxMidY = rowY - 50 + rowBoxH / 2;
                         const totalTextH = row2 ? (relayFontSize + lineGap) : relayFontSize;
-                        const textStartY = boxMidY - totalTextH / 2 + relayFontSize;
+                        const textStartY = boxMidY - totalTextH / 2 + relayFontSize - 2;
+                        
                         ctx.fillText(row1, nameX, textStartY);
                         if (row2) ctx.fillText(row2, nameX, textStartY + lineGap);
                     } else {
-                    // Auto-shrink name font so it never overlaps the time
-                    const maxNameWidth = rightBoundary - nameX;
-                    let nameFontSize = 38;
-                    ctx.font = `900 ${nameFontSize}px sans-serif`;
-                    while (ctx.measureText(runner.athleteName).width > maxNameWidth && nameFontSize > 18) {
-                        nameFontSize -= 2;
-                        ctx.font = `900 ${nameFontSize}px sans-serif`;
-                    }
-                    // Truncate with ellipsis if still too wide at minimum size
-                    let displayName = runner.athleteName;
-                    if (ctx.measureText(displayName).width > maxNameWidth) {
-                        while (ctx.measureText(displayName + '…').width > maxNameWidth && displayName.length > 1) {
-                            displayName = displayName.slice(0, -1);
+                        const maxNameWidth = rightBoundary - nameX;
+                        let nameFontSize = 38;
+                        ctx.font = `900 ${nameFontSize}px ${chosenFont}`;
+                        while (ctx.measureText(runner.athleteName).width > maxNameWidth && nameFontSize > 18) {
+                            nameFontSize -= 2;
+                            ctx.font = `900 ${nameFontSize}px ${chosenFont}`;
                         }
-                        displayName += '…';
-                    }
-                    ctx.fillText(displayName, nameX, rowY + 6);
+                        let displayName = runner.athleteName;
+                        if (ctx.measureText(displayName).width > maxNameWidth) {
+                            while (ctx.measureText(displayName + '…').width > maxNameWidth && displayName.length > 1) {
+                                displayName = displayName.slice(0, -1);
+                            }
+                            displayName += '…';
+                        }
+                        ctx.fillText(displayName, nameX, rowY + 6);
                     }
 
                     ctx.fillStyle = accentColor; 
-                    ctx.font = 'bold 40px monospace';
+                    ctx.font = `bold 40px monospace`;
                     ctx.textAlign = 'right';
                     ctx.fillText(runner.mark, 910, rankTextY);
                 });
             } else {
                 ctx.fillStyle = '#71717a';
-                ctx.font = 'italic 36px sans-serif';
+                ctx.font = `italic 36px ${chosenFont}`;
                 ctx.textAlign = 'center';
-                ctx.fillText(`No qualifying team scores inside Top ${currentPlacementCap}`, 540, startY + 50);
+                ctx.fillText(`No qualifying team scores inside filter range`, 540, startY + 50);
             }
 
             if (prList.length > 0) {
@@ -1035,18 +1144,18 @@
                 ctx.fillStyle = '#111111'; 
                 ctx.fillRect(140, prTopY - 40, 800, 160);
                 ctx.fillStyle = '#ef4444'; 
-                ctx.font = '900 24px sans-serif';
+                ctx.font = `900 24px ${chosenFont}`;
                 ctx.textAlign = 'left';
-                ctx.fillText("🔥 PERSONAL BEST ROSTERS", 170, prTopY);
+                ctx.fillText("🔥 PERSONAL BESTS", 170, prTopY);
                 ctx.fillStyle = '#e4e4e7';
-                ctx.font = 'bold 24px sans-serif';
+                ctx.font = `bold 24px ${chosenFont}`;
                 let namesText = prList.map(a => `${a.athleteName} (${a.mark})`).join(', ');
                 wrapCanvasText(ctx, namesText, 170, prTopY + 45, 740, 32);
             }
 
             if(subtitle) {
                 ctx.fillStyle = '#71717a';
-                ctx.font = 'bold 28px sans-serif';
+                ctx.font = `bold 28px ${chosenFont}`;
                 ctx.textAlign = 'center';
                 ctx.fillText(subtitle, 540, 1050);
             }
@@ -1086,6 +1195,7 @@
 
         function resetEverything() {
             document.getElementById('schoolInput').value = '';
+            document.getElementById('displaySchoolInput').value = '';
             document.getElementById('hashtagInput').value = '';
             document.getElementById('meetNameInput').value = '';
             document.getElementById('linkInput').value = '';
@@ -1108,7 +1218,7 @@
 
         function downloadInstagramGraphic() {
             const selectedEvent = document.getElementById('eventSelector').value || "event";
-            const school = document.getElementById('schoolInput').value.trim().replace(/\s+/g, '_') || "school";
+            const school = getSchoolDisplayName().replace(/\s+/g, '_') || "school";
             const canvas = document.getElementById('instagramCanvas');
             const link = document.createElement('a');
             link.download = `${school}_${selectedEvent.replace(/\s+/g, '_')}.png`;
@@ -1135,16 +1245,22 @@
             
             const selectedEvent = document.getElementById('eventSelector').value;
             if(selectedEvent) {
-                const datasets = parsedMeetDatabase[selectedEvent] || [];
-                drawInstagramCanvas(selectedEvent, datasets.filter(item => item.rank <= currentPlacementCap), document.getElementById('togglePR').checked ? datasets.filter(item => item.isPR) : []);
+                let datasets = parsedMeetDatabase[selectedEvent] || [];
+                let platformPlacements = datasets.filter(item => item.rank <= currentPlacementCap);
+                if (/relay/i.test(selectedEvent) && currentPlacementCap === 3) {
+                    platformPlacements = platformPlacements.filter(item => item.rank === 1);
+                }
+                drawInstagramCanvas(selectedEvent, platformPlacements, document.getElementById('togglePR').checked ? datasets.filter(item => item.isPR) : []);
             }
         }
 
         function generateAllWinnersPosts() {
             const hashtag = document.getElementById('hashtagInput').value.trim();
             const resultsUrl = document.getElementById('linkInput').value.trim();
-            const schoolName = document.getElementById('schoolInput').value.trim().toUpperCase();
+            const schoolName = getSchoolDisplayName();
             const container = document.getElementById('bulkWinnersContainer');
+            const shouldConsolidate = document.getElementById('toggleConsolidateRelays').checked;
+            const chosenFont = getSelectedFontFamily();
             
             container.innerHTML = "";
             container.classList.remove('hidden');
@@ -1164,13 +1280,43 @@
             }
 
             let groupedWinnersMap = {};
-            rawWinners.forEach(w => {
-                let shortEvent = w.event.replace("Girls ", "").replace("Boys ", "");
-                if (!groupedWinnersMap[w.name]) {
-                    groupedWinnersMap[w.name] = { fullName: w.name, gender: w.event.startsWith("Girls") ? "Girls" : "Boys", eventsList: [] };
-                }
-                groupedWinnersMap[w.name].eventsList.push(`${shortEvent} (${w.mark})`);
-            });
+
+            if (shouldConsolidate) {
+                rawWinners.forEach(w => {
+                    let shortEvent = w.event.replace("Girls ", "").replace("Boys ", "");
+                    let isRelay = /relay/i.test(w.event);
+
+                    if (isRelay) {
+                        let athletes = w.name.split(',').map(s => s.trim()).filter(Boolean);
+                        if(athletes.length > 0) {
+                            athletes.forEach(athleteName => {
+                                if (!groupedWinnersMap[athleteName]) {
+                                    groupedWinnersMap[athleteName] = { fullName: athleteName, eventsList: [] };
+                                }
+                                groupedWinnersMap[athleteName].eventsList.push(`${shortEvent} - ${w.mark}`);
+                            });
+                        } else {
+                            if (!groupedWinnersMap[w.name]) {
+                                groupedWinnersMap[w.name] = { fullName: w.name, eventsList: [] };
+                            }
+                            groupedWinnersMap[w.name].eventsList.push(`${shortEvent} - ${w.mark}`);
+                        }
+                    } else {
+                        if (!groupedWinnersMap[w.name]) {
+                            groupedWinnersMap[w.name] = { fullName: w.name, eventsList: [] };
+                        }
+                        groupedWinnersMap[w.name].eventsList.push(`${shortEvent} - ${w.mark}`);
+                    }
+                });
+            } else {
+                rawWinners.forEach(w => {
+                    let shortEvent = w.event.replace("Girls ", "").replace("Boys ", "");
+                    if (!groupedWinnersMap[w.name]) {
+                        groupedWinnersMap[w.name] = { fullName: w.name, eventsList: [] };
+                    }
+                    groupedWinnersMap[w.name].eventsList.push(`${shortEvent} - ${w.mark}`);
+                });
+            }
 
             let consolidatedWinners = Object.values(groupedWinnersMap);
             let postDrafts = [];
@@ -1181,7 +1327,7 @@
             
             let currentBody = "";
             consolidatedWinners.forEach((w) => {
-                let entryLine = `• ${w.fullName} (${w.gender}) - ${w.eventsList.join(', ')}\n`;
+                let entryLine = `• ${w.fullName} - ${w.eventsList.join(', ')}\n`;
                 if (`${baseHeader} (9/9) 🐾\n\n🥇 1st Place Finishes:\n${currentBody}${entryLine}${footer}`.trim().length > 280 && currentBody !== "") {
                     postDrafts.push(currentBody);
                     currentBody = entryLine;
@@ -1219,31 +1365,49 @@
                 const bulkAccent = getAccentColor();
                 const bulkBg = getBgColor();
                 const bulkMeetName = document.getElementById('meetNameInput') ? document.getElementById('meetNameInput').value.trim().toUpperCase() : '';
-                bulkCtx.fillStyle = bulkBg; bulkCtx.fillRect(0, 0, 1080, 1080);
-                bulkCtx.fillStyle = bulkAccent; bulkCtx.fillRect(0, 0, 1080, 40);
+                
+                bulkCtx.fillStyle = bulkBg; 
+                bulkCtx.fillRect(0, 0, 1080, 1080);
+                
+                drawWatermarkOnCanvas(bulkCtx);
 
-                bulkCtx.fillStyle = '#ffffff'; bulkCtx.font = '900 32px sans-serif'; bulkCtx.textAlign = 'center';
+                bulkCtx.fillStyle = bulkAccent; 
+                bulkCtx.fillRect(0, 0, 1080, 40);
+
+                bulkCtx.fillStyle = '#ffffff'; 
+                bulkCtx.font = `900 32px ${chosenFont}`; 
+                bulkCtx.textAlign = 'center';
                 bulkCtx.fillText(schoolName + " TRACK & FIELD", 540, 90);
 
                 if (bulkMeetName) {
-                    bulkCtx.fillStyle = bulkAccent; bulkCtx.font = 'bold 22px sans-serif';
+                    bulkCtx.fillStyle = bulkAccent; 
+                    bulkCtx.font = `bold 22px ${chosenFont}`;
                     bulkCtx.fillText(bulkMeetName, 540, 125);
                 }
 
                 const bulkTitleY = bulkMeetName ? 210 : 195;
-                bulkCtx.font = '900 68px sans-serif'; bulkCtx.lineWidth = 14; bulkCtx.strokeStyle = bulkBg;
-                bulkCtx.strokeText("MEET CHAMPIONS", 540, bulkTitleY); bulkCtx.fillStyle = bulkAccent; bulkCtx.fillText("MEET CHAMPIONS", 540, bulkTitleY);
+                bulkCtx.font = `900 68px ${chosenFont}`; 
+                bulkCtx.lineWidth = 14; 
+                bulkCtx.strokeStyle = bulkBg;
+                bulkCtx.strokeText("MEET CHAMPIONS", 540, bulkTitleY); 
+                bulkCtx.fillStyle = bulkAccent; 
+                bulkCtx.fillText("MEET CHAMPIONS", 540, bulkTitleY);
 
                 const bulkPageY = bulkMeetName ? 255 : 240;
-                bulkCtx.fillStyle = '#71717a'; bulkCtx.font = 'bold 24px sans-serif'; bulkCtx.fillText(`PAGE ${slideIndex + 1} OF ${slideGroups.length}`, 540, bulkPageY);
+                bulkCtx.fillStyle = '#71717a'; 
+                bulkCtx.font = `bold 24px ${chosenFont}`; 
+                bulkCtx.fillText(`PAGE ${slideIndex + 1} OF ${slideGroups.length}`, 540, bulkPageY);
 
                 const bulkDivY = bulkMeetName ? 280 : 270;
-                bulkCtx.strokeStyle = '#222222'; bulkCtx.lineWidth = 4;
+                bulkCtx.strokeStyle = '#222222'; 
+                bulkCtx.lineWidth = 4;
                 bulkCtx.beginPath(); bulkCtx.moveTo(140, bulkDivY); bulkCtx.lineTo(940, bulkDivY); bulkCtx.stroke();
 
                 let currentYPosition = bulkMeetName ? 345 : 330;
                 athletesInSlide.forEach((athlete) => {
-                    bulkCtx.font = 'bold 24px sans-serif';
+                    let isRelayString = athlete.eventsList.some(evt => evt.toLowerCase().includes("relay"));
+                    
+                    bulkCtx.font = `bold 24px ${chosenFont}`;
                     let eventsSubtext = `🏆 1st Place: ${athlete.eventsList.join(', ')}`;
                     let linesCounter = 1;
                     let words = eventsSubtext.split(' ');
@@ -1254,40 +1418,64 @@
                         else { currentTestingLine = testLine; }
                     }
 
-                    let totalBoxHeight = (45 + (linesCounter * 32)) + 60;
-                    bulkCtx.fillStyle = '#111111'; bulkCtx.fillRect(140, currentYPosition, 800, totalBoxHeight);
-                    bulkCtx.fillStyle = bulkAccent; bulkCtx.fillRect(140, currentYPosition, 15, totalBoxHeight);
+                    let baseBoxH = isRelayString ? 75 : 45;
+                    let totalBoxHeight = (baseBoxH + (linesCounter * 32)) + 60;
+                    bulkCtx.fillStyle = '#111111'; 
+                    bulkCtx.fillRect(140, currentYPosition, 800, totalBoxHeight);
+                    bulkCtx.fillStyle = bulkAccent; 
+                    bulkCtx.fillRect(140, currentYPosition, 15, totalBoxHeight);
 
-                    bulkCtx.fillStyle = '#ffffff'; bulkCtx.textAlign = 'left';
-                    let bulkNameX = 180;
-                    if (logoRowImg) {
-                        const rowLogoMaxH = parseInt(document.getElementById('logoRowSize').value) || 52;
-                        const rowLogoOffsetY = parseInt(document.getElementById('logoRowOffsetY').value) || 0;
-                        const rowLogoMaxW = 120;
-                        const ratio = Math.min(rowLogoMaxH / logoRowImg.height, rowLogoMaxW / logoRowImg.width);
-                        const lw = logoRowImg.width * ratio;
-                        const lh = logoRowImg.height * ratio;
-                        bulkCtx.drawImage(logoRowImg, bulkNameX, currentYPosition + 54 - lh + 4 + rowLogoOffsetY, lw, lh);
-                        bulkNameX += lw + 10;
+                    bulkCtx.fillStyle = '#ffffff'; 
+                    bulkCtx.textAlign = 'left';
+                    
+                    let bulkNameX = 180; 
+                    const bulkMaxNameW = 720; 
+                    
+                    if (isRelayString) {
+                        const parts = athlete.fullName.split(',').map(s => s.trim()).filter(Boolean);
+                        let r1 = "";
+                        let r2 = "";
+                        if(parts.length <= 2) {
+                            r1 = parts.join(', ');
+                        } else {
+                            const h = Math.ceil(parts.length / 2);
+                            r1 = parts.slice(0, h).join(', ') + ",";
+                            r2 = parts.slice(h).join(', ');
+                        }
+                        
+                        let rFontSize = 28;
+                        bulkCtx.font = `900 ${rFontSize}px ${chosenFont}`;
+                        let longR = r1.length >= r2.length ? r1 : r2;
+                        while(bulkCtx.measureText(longR).width > bulkMaxNameW && rFontSize > 12) {
+                            rFontSize--;
+                            bulkCtx.font = `900 ${rFontSize}px ${chosenFont}`;
+                        }
+                        
+                        bulkCtx.fillText(r1.toUpperCase(), bulkNameX, currentYPosition + 36);
+                        if(r2) bulkCtx.fillText(r2.toUpperCase(), bulkNameX, currentYPosition + 36 + rFontSize + 6);
+                    } else {
+                        let bulkFontSize = 36;
+                        bulkCtx.font = `900 ${bulkFontSize}px ${chosenFont}`;
+                        const bulkDisplayName = athlete.fullName.toUpperCase();
+                        while (bulkCtx.measureText(bulkDisplayName).width > bulkMaxNameW && bulkFontSize > 16) {
+                            bulkFontSize -= 2;
+                            bulkCtx.font = `900 ${bulkFontSize}px ${chosenFont}`;
+                        }
+                        bulkCtx.fillText(bulkDisplayName, bulkNameX, currentYPosition + 54);
                     }
-                    const bulkMaxNameW = 800 - (bulkNameX - 140) - 20;
-                    let bulkFontSize = 36;
-                    bulkCtx.font = `900 ${bulkFontSize}px sans-serif`;
-                    const bulkDisplayName = athlete.fullName.toUpperCase();
-                    while (bulkCtx.measureText(bulkDisplayName).width > bulkMaxNameW && bulkFontSize > 16) {
-                        bulkFontSize -= 2;
-                        bulkCtx.font = `900 ${bulkFontSize}px sans-serif`;
-                    }
-                    bulkCtx.fillText(bulkDisplayName, bulkNameX, currentYPosition + 54);
-                    // gender badge removed per user preference
 
-                    bulkCtx.fillStyle = '#a1a1aa'; bulkCtx.font = 'bold 24px sans-serif'; bulkCtx.textAlign = 'left';
-                    wrapCanvasText(bulkCtx, eventsSubtext, 180, currentYPosition + 100, 720, 32);
+                    bulkCtx.fillStyle = '#a1a1aa'; 
+                    bulkCtx.font = `bold 24px ${chosenFont}`; 
+                    bulkCtx.textAlign = 'left';
+                    let textOffsetY = isRelayString ? 124 : 100;
+                    wrapCanvasText(bulkCtx, eventsSubtext, 180, currentYPosition + textOffsetY, 720, 32);
                     currentYPosition += totalBoxHeight + 25;
                 });
 
                 if(hashtag) {
-                    bulkCtx.fillStyle = '#71717a'; bulkCtx.font = 'bold 28px sans-serif'; bulkCtx.textAlign = 'center';
+                    bulkCtx.fillStyle = '#71717a'; 
+                    bulkCtx.font = `bold 28px ${chosenFont}`; 
+                    bulkCtx.textAlign = 'center';
                     bulkCtx.fillText(hashtag, 540, 1050);
                 }
 
