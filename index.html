@@ -19,7 +19,7 @@
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
                 ⚡ <span>TRACK SOCIAL MEDIA POST GENERATOR</span>
             </h1>
-            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">Paste results from Milesplit or Athletic.net to easily generate content</p>
+            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">Paste results from Milesplit or Athletic.net to easily generate content. · v13</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
@@ -402,13 +402,26 @@
         }
 
         function cleanPerformanceMark(markStr) {
-            if(!markStr) return "";
-            let clean = markStr.replace(/(\d+(\.\d+)?)\s*[aAhH]+\b/g, '$1');
-            clean = clean.replace(/(\d+)\s*[aA]$/g, '$1');
-            if (clean.includes("(")) clean = clean.split("(")[0].trim();
-            if (clean.includes("'")) clean = clean.replace(/\s+/g, '').replace(/"/g, '').replace(/'/g, '-');
-            return clean.trim();
-        }
+    if (!markStr) return "";
+
+    let clean = markStr;
+
+    clean = clean.replace(/(\d+(\.\d+)?)\s*[aAhH]+\b/g, '$1');
+    clean = clean.replace(/(\d+)\s*[aA]$/g, '$1');
+
+    if (clean.includes("(")) {
+        clean = clean.split("(")[0].trim();
+    }
+
+    if (clean.includes("'")) {
+        clean = clean
+            .replace(/\s+/g, '')
+            .replace(/"/g, '')
+            .replace(/'/g, '-');
+    }
+
+    return clean.trim();
+}
 
         function stripWindReadings(textStr) {
             return textStr.replace(/\s*\(\s*-?\d+(\.\d+)?\s*\)\s*/g, ' ').trim();
@@ -584,7 +597,7 @@
                     } else if (!isRelayBlock && block.length >= 3) {
                         let athleteName = block[0];
                         let teamName    = block[1];
-                        let mark        = block[2].replace(/[^\d:.]/g, '');
+                        let mark        = block[2].replace(/[^\d:.\-]/g, '');
                         let metadata    = block[3] || '';
                         let isPR = /\bPB\b|\bPR\b|\bSB\b/i.test(metadata) || /\bPB\b|\bPR\b|\bSB\b/i.test(mark);
 
@@ -936,7 +949,7 @@
             processingText = processingText.replace(/\b(PR|PB|SB)\b/gi, '').replace(/\s+/g, ' ').trim();
             processingText = processingText.replace(/^([56789]|10|11|12)\s+/, '');
 
-            const gradeSchoolMatch = processingText.match(/^(.+?)\s+(?:9|10|11|12)\s+.+?(\d[\d:\.]+)\s*$/);
+            const gradeSchoolMatch = processingText.match(/^(.+?)\s+(?:9|10|11|12)\s+.+?(\d[\d:\.\-]+)\s*$/);
             let namePart, markPart;
             if (gradeSchoolMatch) {
                 namePart = gradeSchoolMatch[1].trim();
@@ -949,7 +962,7 @@
                     markPart = markMatch[2].trim();
                 } else {
                     namePart = processingText.replace(/[\d\.\:\-].*$/, '').trim();
-                    markPart = processingText.replace(/^.*?([\d][\d:\.]+).*$/, '$1').trim();
+                    markPart = processingText.replace(/^.*?([\d][\d:\.\-]+).*$/, '$1').trim();
                 }
             }
             markPart = cleanPerformanceMark(markPart);
