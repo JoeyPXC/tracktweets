@@ -19,7 +19,7 @@
             <h1 class="text-2xl sm:text-3xl font-black tracking-tight text-amber-400 flex items-center justify-center gap-2">
                 ⚡ <span>TRACK SOCIAL MEDIA POST GENERATOR</span>
             </h1>
-            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">Paste results from Milesplit or Athletic.net to easily generate content. · v13</p>
+            <p class="text-xs sm:text-sm text-gray-400 mt-0.5">Paste results from Milesplit or Athletic.net to easily generate content</p>
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
@@ -430,11 +430,16 @@
 
         function cleanEventTitle(rawTitle, genderSection) {
             let clean = rawTitle.trim();
-            let isWheelchair = /wheelchair|wc\b/i.test(clean);
+            
+            // Detect if it is a wheelchair/seated event upfront
+            let isWheelchair = /wheelchair|wc\b|seated/i.test(clean);
 
             let inferredGender = genderSection;
             if (/^Girls\s/i.test(clean)) { inferredGender = "Girls"; clean = clean.replace(/^Girls\s+/i, ""); }
             else if (/^Boys\s/i.test(clean))  { inferredGender = "Boys";  clean = clean.replace(/^Boys\s+/i,  ""); }
+
+            // Strip out common weight designations (e.g., 12lb, 4kg, 1.6kg, 1kg) including surrounding spacing/hyphens/brackets
+            clean = clean.replace(/[-\s(]*\d+(\.\d+)?\s*(lb|kg)[)\s]*/gi, " ");
 
             clean = clean.replace(/\s*\(?\s*Div(?:ision)?\s*\d+\s*\)?/gi, "");
             clean = clean.replace(/\s*\d{2}["']\s*\/\s*[\d.]+m?\s*/g, " ");
@@ -444,10 +449,12 @@
             clean = clean
                 .replace(/\s*Varsity\s*-\s*Finals/gi, "")
                 .replace(/\s*Wheelchair\s*-\s*Finals/gi, "")
+                .replace(/\s*Seated\s*-\s*Finals/gi, "")
                 .replace(/\s*-\s*Finals/gi, "")
                 .replace(/\s*Finals/gi, "")
                 .replace(/\s*Varsity/gi, "")
                 .replace(/\s*Wheelchair/gi, "")
+                .replace(/\s*Seated/gi, "")
                 .trim();
 
             clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
@@ -460,7 +467,7 @@
 
             let baseTitle = `${inferredGender} ${clean}`.replace(/\s+/g, ' ').trim();
             if (isWheelchair) {
-                baseTitle = baseTitle.replace(/\s+Relay/i, "").replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "") + " WC";
+                baseTitle = baseTitle.replace(/\s+Relay/i, "").replace(/\s*-\s*WC/gi, "").replace(/\s+WC/gi, "").replace(/\s+Seated/i, "") + " WC";
             }
             return baseTitle;
         }
@@ -860,7 +867,7 @@
                 if (line.includes("Mens Results")) { currentGenderSection = "Boys"; continue; }
                 if (line.includes("Womens Results")) { currentGenderSection = "Girls"; continue; }
 
-                if (line.includes("Varsity") || line.includes("Relay") || line.includes("Wheelchair") || line.includes("Meters") || line.includes("WC") || line.includes("Hurdles")) {
+                if (line.includes("Varsity") || line.includes("Relay") || line.includes("Wheelchair") || line.includes("Seated") || line.includes("Meters") || line.includes("WC") || line.includes("Hurdles") || line.includes("Shot Put") || line.includes("Discus")) {
                     if (line.includes("Results")) continue; 
                     if (/^\d+\./.test(line)) continue;
                     if (/^--/.test(line)) continue;
