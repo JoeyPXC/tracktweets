@@ -325,12 +325,38 @@
                         <input type="checkbox" id="storyToggleBulk" class="accent-pink-500">
                     </label>
 
-                    <button onclick="generateAllWinnersPosts()" 
+                    <button onclick="generateAllWinnersPosts('winners')" 
                             class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-widest transition-all shadow-md">
                         ⚡ Generate Winners Content & Graphics
                     </button>
                     <canvas id="bulkWinnersCanvas" width="1080" height="1080" class="hidden"></canvas>
                     <div id="bulkWinnersContainer" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 hidden"></div>
+                </div>
+
+                <div class="bg-gray-900 rounded-xl p-4 border border-gray-800 shadow-lg">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-blue-500 mb-2">&#x1F4CA; All Placers</h2>
+                    <p class="text-[11px] text-gray-400 mb-3">Every finish by your team in the top places (set how many below), as separate graphics. In a dual meet (Top 3), only the relay winner is listed. Uses the relay grouping option above.</p>
+
+                    <label class="flex items-center justify-between p-2 mb-3 bg-black rounded-lg border border-gray-800 select-none">
+                        <span class="text-xs font-semibold text-gray-300">Places to include</span>
+                        <select id="scoringPlacesSelect" class="bg-gray-900 border border-gray-700 rounded-md text-xs text-white px-2 py-1">
+                            <option value="3">Top 3 (dual meet)</option>
+                            <option value="5">Top 5</option>
+                            <option value="6">Top 6</option>
+                            <option value="8" selected>Top 8</option>
+                        </select>
+                    </label>
+
+                    <label class="flex items-center justify-between p-2 mb-3 bg-black rounded-lg border border-gray-800 cursor-pointer select-none">
+                        <span class="text-xs font-semibold text-gray-300">Story size for share/download (1080&times;1920)</span>
+                        <input type="checkbox" id="storyToggleScorers" class="accent-pink-500">
+                    </label>
+
+                    <button onclick="generateAllWinnersPosts('scorers')"
+                            class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg text-xs uppercase tracking-widest transition-all shadow-md">
+                        &#x26A1; Generate Placers Content &amp; Graphics
+                    </button>
+                    <div id="bulkScorersContainer" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 hidden"></div>
                 </div>
 
             </div>
@@ -380,7 +406,10 @@
                     if (sel) {
                         renderSocialPost();
                         if(!document.getElementById('bulkWinnersContainer').classList.contains('hidden')) {
-                            generateAllWinnersPosts();
+                            generateAllWinnersPosts('winners');
+                        }
+                        if(!document.getElementById('bulkScorersContainer').classList.contains('hidden')) {
+                            generateAllWinnersPosts('scorers');
                         }
                     }
                 };
@@ -1018,6 +1047,7 @@
             document.getElementById('dashboardSection').classList.remove('hidden');
             document.getElementById('scoreSection').classList.remove('hidden');
             document.getElementById('bulkWinnersContainer').classList.add('hidden');
+            document.getElementById('bulkScorersContainer').classList.add('hidden');
             updateScorePost();
         }
 
@@ -1369,6 +1399,8 @@
             document.getElementById('scoreSection').classList.add('hidden');
             document.getElementById('bulkWinnersContainer').classList.add('hidden');
             document.getElementById('bulkWinnersContainer').innerHTML = '';
+            document.getElementById('bulkScorersContainer').classList.add('hidden');
+            document.getElementById('bulkScorersContainer').innerHTML = '';
             document.getElementById('instagramPreviewImage').src = '';
             parsedMeetDatabase = {};
             document.getElementById('schoolInput').focus();
@@ -1432,25 +1464,28 @@
             await shareOrDownload(url, `${school}_${selectedEvent.replace(/\s+/g, '_')}${story ? '_story' : ''}.png`);
         }
 
-        let bulkSlideUrls = [];
+        let bulkSlideUrls = { winners: [], scorers: [] };
+        const bulkPrefix = m => m === 'scorers' ? 'IG_Placers_Page_' : 'IG_Meet_Champions_Page_';
+        const bulkStoryOn = m => document.getElementById(m === 'scorers' ? 'storyToggleScorers' : 'storyToggleBulk').checked;
 
-        async function bulkSlideFiles() {
-            const story = document.getElementById('storyToggleBulk').checked;
+        async function bulkSlideFiles(mode) {
+            const urls = bulkSlideUrls[mode] || [];
+            const story = bulkStoryOn(mode);
             const out = [];
-            for (let i = 0; i < bulkSlideUrls.length; i++) {
-                if (!bulkSlideUrls[i]) continue;
-                let url = bulkSlideUrls[i];
+            for (let i = 0; i < urls.length; i++) {
+                if (!urls[i]) continue;
+                let url = urls[i];
                 if (story) url = makeStoryDataUrl(await loadImg(url));
                 const blob = await (await fetch(url)).blob();
-                out.push(new File([blob], `IG_Meet_Champions_Page_${i + 1}${story ? '_story' : ''}.png`, { type: 'image/png' }));
+                out.push(new File([blob], `${bulkPrefix(mode)}${i + 1}${story ? '_story' : ''}.png`, { type: 'image/png' }));
             }
             return out;
         }
 
         // One share sheet with every page attached (they arrive as separate images).
         // If the browser can't share files, falls back to downloading them all.
-        async function shareAllBulkSlides() {
-            const files = await bulkSlideFiles();
+        async function shareAllBulkSlides(mode) {
+            const files = await bulkSlideFiles(mode);
             if (!files.length) return;
             try {
                 if (navigator.canShare && navigator.canShare({ files })) {
@@ -1463,8 +1498,8 @@
             await saveFilesOneByOne(files);
         }
 
-        async function downloadAllBulkSlides() {
-            const files = await bulkSlideFiles();
+        async function downloadAllBulkSlides(mode) {
+            const files = await bulkSlideFiles(mode);
             await saveFilesOneByOne(files);
         }
 
@@ -1479,11 +1514,11 @@
                 await new Promise(r => setTimeout(r, 500));
             }
         }
-        async function shareBulkSlide(i) {
-            const story = document.getElementById('storyToggleBulk').checked;
-            let url = bulkSlideUrls[i];
+        async function shareBulkSlide(mode, i) {
+            const story = bulkStoryOn(mode);
+            let url = bulkSlideUrls[mode][i];
             if (story) url = makeStoryDataUrl(await loadImg(url));
-            await shareOrDownload(url, `IG_Meet_Champions_Page_${i + 1}${story ? '_story' : ''}.png`);
+            await shareOrDownload(url, `${bulkPrefix(mode)}${i + 1}${story ? '_story' : ''}.png`);
         }
 
         function updateScorePost() {
@@ -1514,22 +1549,30 @@
             }
         }
 
-        function generateAllWinnersPosts() {
+        function generateAllWinnersPosts(mode) {
+            mode = mode === 'scorers' ? 'scorers' : 'winners';
+            const isScorers = mode === 'scorers';
+            const scoringCap = parseInt((document.getElementById('scoringPlacesSelect') || {}).value, 10) || 8;
+            const headTitle = isScorers ? `📊 Top ${scoringCap} Finishes!` : '🏆 Meet Champions!';
+            const subHead = isScorers ? '🏅 Placers:' : '🥇 1st Place Finishes:';
+            const graphicTitle = isScorers ? `TOP ${scoringCap} FINISHES` : 'MEET CHAMPIONS';
+            const graphicLabel = isScorers ? '📊 Placed:' : '🏆 1st Place:';
+            const fmtEntry = (shortEvent, w) => isScorers ? `${shortEvent} - ${getOrdinalSuffix(w.rank)} (${w.mark})` : `${shortEvent} - ${w.mark}`;
             const hashtag = document.getElementById('hashtagInput').value.trim();
             const resultsUrl = document.getElementById('linkInput').value.trim();
             const schoolName = getSchoolDisplayName();
-            const container = document.getElementById('bulkWinnersContainer');
+            const container = document.getElementById(isScorers ? 'bulkScorersContainer' : 'bulkWinnersContainer');
             const shouldConsolidate = document.getElementById('toggleConsolidateRelays').checked;
             const chosenFont = getSelectedFontFamily();
             
             container.innerHTML = "";
-            bulkSlideUrls = [];
+            bulkSlideUrls[mode] = [];
             container.classList.remove('hidden');
             const allBar = document.createElement('div');
             allBar.className = "sm:col-span-2 grid grid-cols-2 gap-2";
             allBar.innerHTML = `
-                <button onclick="shareAllBulkSlides()" class="bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider shadow-md">&#x1F4E4; Share All Pages</button>
-                <button onclick="downloadAllBulkSlides()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider shadow-md border border-gray-700">&#x1F4F8; Download All Pages</button>`;
+                <button onclick="shareAllBulkSlides('${mode}')" class="bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider shadow-md">&#x1F4E4; Share All Pages</button>
+                <button onclick="downloadAllBulkSlides('${mode}')" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider shadow-md border border-gray-700">&#x1F4F8; Download All Pages</button>`;
             container.appendChild(allBar);
 
             let rawWinners = [];
@@ -1537,15 +1580,17 @@
 
             sortedEventNames.forEach(eventName => {
                 let items = parsedMeetDatabase[eventName] || [];
-                let winners = items.filter(a => a.rank === 1);
+                // In a dual meet (Top 3) only the relay winner scores, so 2nd/3rd relay places are left out
+                const relayEvent = /relay/i.test(eventName);
+                let winners = items.filter(a => isScorers ? (a.rank >= 1 && a.rank <= scoringCap && !(relayEvent && scoringCap === 3 && a.rank > 1)) : a.rank === 1);
                 winners.forEach(w => {
                     const resolvedName = getResolvedRelayName(eventName, w.rank, w.athleteName);
-                    rawWinners.push({ event: eventName, name: resolvedName, mark: w.mark });
+                    rawWinners.push({ event: eventName, name: resolvedName, mark: w.mark, rank: w.rank });
                 });
             });
 
             if(rawWinners.length === 0) {
-                container.innerHTML = `<div class="col-span-1 sm:col-span-2 text-xs text-blue-500 bg-black p-3 rounded-lg border border-gray-800 text-center">No 1st place finishers found.</div>`;
+                container.innerHTML = `<div class="col-span-1 sm:col-span-2 text-xs text-blue-500 bg-black p-3 rounded-lg border border-gray-800 text-center">${isScorers ? 'No placers found.' : 'No 1st place finishers found.'}</div>`;
                 return;
             }
 
@@ -1563,19 +1608,19 @@
                                 if (!groupedWinnersMap[athleteName]) {
                                     groupedWinnersMap[athleteName] = { fullName: athleteName, eventsList: [] };
                                 }
-                                groupedWinnersMap[athleteName].eventsList.push(`${shortEvent} - ${w.mark}`);
+                                groupedWinnersMap[athleteName].eventsList.push(fmtEntry(shortEvent, w));
                             });
                         } else {
                             if (!groupedWinnersMap[w.name]) {
                                 groupedWinnersMap[w.name] = { fullName: w.name, eventsList: [] };
                             }
-                            groupedWinnersMap[w.name].eventsList.push(`${shortEvent} - ${w.mark}`);
+                            groupedWinnersMap[w.name].eventsList.push(fmtEntry(shortEvent, w));
                         }
                     } else {
                         if (!groupedWinnersMap[w.name]) {
                             groupedWinnersMap[w.name] = { fullName: w.name, eventsList: [] };
                         }
-                        groupedWinnersMap[w.name].eventsList.push(`${shortEvent} - ${w.mark}`);
+                        groupedWinnersMap[w.name].eventsList.push(fmtEntry(shortEvent, w));
                     }
                 });
             } else {
@@ -1584,13 +1629,13 @@
                     if (!groupedWinnersMap[w.name]) {
                         groupedWinnersMap[w.name] = { fullName: w.name, eventsList: [] };
                     }
-                    groupedWinnersMap[w.name].eventsList.push(`${shortEvent} - ${w.mark}`);
+                    groupedWinnersMap[w.name].eventsList.push(fmtEntry(shortEvent, w));
                 });
             }
 
             let consolidatedWinners = Object.values(groupedWinnersMap);
             let postDrafts = [];
-            let baseHeader = `🏆 Meet Champions!`;
+            let baseHeader = headTitle;
             let footer = "";
             if (resultsUrl) footer += `\n📊 Live Results: ${resultsUrl}`;
             if (hashtag) footer += `\n${hashtag}`;
@@ -1598,7 +1643,7 @@
             let currentBody = "";
             consolidatedWinners.forEach((w) => {
                 let entryLine = `• ${w.fullName} - ${w.eventsList.join(', ')}\n`;
-                if (`${baseHeader} (9/9) 🐾\n\n🥇 1st Place Finishes:\n${currentBody}${entryLine}${footer}`.trim().length > 280 && currentBody !== "") {
+                if (`${baseHeader} (9/9) 🐾\n\n${subHead}\n${currentBody}${entryLine}${footer}`.trim().length > 280 && currentBody !== "") {
                     postDrafts.push(currentBody);
                     currentBody = entryLine;
                 } else {
@@ -1608,8 +1653,8 @@
             if(currentBody) postDrafts.push(currentBody);
 
             postDrafts.forEach((bodyText, index) => {
-                let finalString = `🏆 Meet Champions! (${index + 1}/${postDrafts.length}) 🐾\n\n🥇 1st Place Finishes:\n${bodyText}${footer}`;
-                let areaId = `winner_post_${index}`;
+                let finalString = `${headTitle} (${index + 1}/${postDrafts.length}) 🐾\n\n${subHead}\n${bodyText}${footer}`;
+                let areaId = `${mode}_post_${index}`;
                 let wrapper = document.createElement('div');
                 wrapper.className = "bg-black p-3 rounded-lg border border-gray-800 space-y-2 flex flex-col justify-between";
                 wrapper.innerHTML = `
@@ -1656,12 +1701,14 @@
                 }
 
                 const bulkTitleY = bulkMeetName ? 210 : 195;
-                bulkCtx.font = `900 68px ${chosenFont}`; 
+                let titleSize = 68;
+                bulkCtx.font = `900 ${titleSize}px ${chosenFont}`;
+                while (bulkCtx.measureText(graphicTitle).width > 940 && titleSize > 36) { titleSize -= 2; bulkCtx.font = `900 ${titleSize}px ${chosenFont}`; }
                 bulkCtx.lineWidth = 14; 
                 bulkCtx.strokeStyle = bulkBg;
-                bulkCtx.strokeText("MEET CHAMPIONS", 540, bulkTitleY); 
+                bulkCtx.strokeText(graphicTitle, 540, bulkTitleY); 
                 bulkCtx.fillStyle = bulkAccent; 
-                bulkCtx.fillText("MEET CHAMPIONS", 540, bulkTitleY);
+                bulkCtx.fillText(graphicTitle, 540, bulkTitleY);
 
                 const bulkPageY = bulkMeetName ? 255 : 240;
                 bulkCtx.fillStyle = '#71717a'; 
@@ -1678,7 +1725,7 @@
                     let isRelayString = athlete.eventsList.some(evt => evt.toLowerCase().includes("relay"));
                     
                     bulkCtx.font = `bold 24px ${chosenFont}`;
-                    let eventsSubtext = `🏆 1st Place: ${athlete.eventsList.join(', ')}`;
+                    let eventsSubtext = `${graphicLabel} ${athlete.eventsList.join(', ')}`;
                     let linesCounter = 1;
                     let words = eventsSubtext.split(' ');
                     let currentTestingLine = '';
@@ -1752,31 +1799,31 @@
                 let slideDataUrl = bulkCanvas.toDataURL('image/png');
                 drawLogosOnCanvas(bulkCtx);
                 slideDataUrl = bulkCanvas.toDataURL('image/png');
-                bulkSlideUrls[slideIndex] = slideDataUrl;
+                bulkSlideUrls[mode][slideIndex] = slideDataUrl;
                 let graphicCardWrapper = document.createElement('div');
                 graphicCardWrapper.className = "bg-black p-3 rounded-xl border border-gray-800 flex flex-col justify-between items-center text-center space-y-3 shadow-md";
                 graphicCardWrapper.innerHTML = `
                     <div class="w-full">
-                        <span class="text-[10px] font-mono text-pink-400 block mb-1 uppercase tracking-wider">📸 WINNERS GRAPHIC PAGE ${slideIndex + 1}</span>
+                        <span class="text-[10px] font-mono text-pink-400 block mb-1 uppercase tracking-wider">📸 ${isScorers ? 'PLACERS' : 'WINNERS'} GRAPHIC PAGE ${slideIndex + 1}</span>
                         <div class="w-full aspect-square bg-gray-950 rounded-lg border border-gray-800 overflow-hidden shadow-inner max-w-[180px] mx-auto">
                             <img src="${slideDataUrl}" class="w-full h-full object-contain">
                         </div>
                     </div>
                     <div class="w-full grid grid-cols-2 gap-2">
-                        <button onclick="shareBulkSlide(${slideIndex})" class="bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2 rounded text-xs uppercase tracking-wider">&#x1F4E4; Share</button>
-                        <button onclick="downloadDirectBulkSlide(${slideIndex})" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 rounded text-xs uppercase tracking-wider border border-gray-700">&#x1F4F8; Download</button>
+                        <button onclick="shareBulkSlide('${mode}', ${slideIndex})" class="bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2 rounded text-xs uppercase tracking-wider">&#x1F4E4; Share</button>
+                        <button onclick="downloadDirectBulkSlide('${mode}', ${slideIndex})" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 rounded text-xs uppercase tracking-wider border border-gray-700">&#x1F4F8; Download</button>
                     </div>
                 `;
                 container.appendChild(graphicCardWrapper);
             });
         }
 
-        async function downloadDirectBulkSlide(i) {
-            const story = document.getElementById('storyToggleBulk').checked;
-            let url = bulkSlideUrls[i];
+        async function downloadDirectBulkSlide(mode, i) {
+            const story = bulkStoryOn(mode);
+            let url = bulkSlideUrls[mode][i];
             if (story) url = makeStoryDataUrl(await loadImg(url));
             const link = document.createElement('a');
-            link.download = `IG_Meet_Champions_Page_${i + 1}${story ? '_story' : ''}.png`;
+            link.download = `${bulkPrefix(mode)}${i + 1}${story ? '_story' : ''}.png`;
             link.href = url;
             link.click();
         }
