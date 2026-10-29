@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -293,10 +291,19 @@
                                 <img id="instagramPreviewImage" class="w-full h-full object-contain" alt="Instagram graphic placeholder">
                             </div>
                         </div>
-                        <button onclick="downloadInstagramGraphic()" 
-                                class="w-full mt-3 bg-gradient-to-r from-pink-600 to-blue-500 hover:opacity-90 text-white font-bold py-2.5 px-4 rounded-lg text-xs uppercase tracking-wider shadow-md">
-                            📸 Download Graphic (.PNG)
-                        </button>
+                        <label class="flex items-center justify-center gap-2 mt-3 text-[11px] font-semibold text-gray-300 cursor-pointer select-none">
+                            <input type="checkbox" id="storyToggleSingle" class="accent-pink-500"> Story size (1080&times;1920)
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <button onclick="shareInstagramGraphic()"
+                                    class="bg-gradient-to-r from-pink-600 to-blue-500 hover:opacity-90 text-white font-bold py-2.5 px-2 rounded-lg text-xs uppercase tracking-wider shadow-md">
+                                &#x1F4E4; Share
+                            </button>
+                            <button onclick="downloadInstagramGraphic()"
+                                    class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 px-2 rounded-lg text-xs uppercase tracking-wider shadow-md border border-gray-700">
+                                &#x1F4F8; Download
+                            </button>
+                        </div>
                     </div>
 
                 </div>
@@ -311,6 +318,11 @@
                             <input type="checkbox" id="toggleConsolidateRelays" class="sr-only peer">
                             <div class="w-9 h-5 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
                         </div>
+                    </label>
+
+                    <label class="flex items-center justify-between p-2 mb-3 bg-black rounded-lg border border-gray-800 cursor-pointer select-none">
+                        <span class="text-xs font-semibold text-gray-300">Story size for share/download (1080&times;1920)</span>
+                        <input type="checkbox" id="storyToggleBulk" class="accent-pink-500">
                     </label>
 
                     <button onclick="generateAllWinnersPosts()" 
@@ -1350,10 +1362,112 @@
             const selectedEvent = document.getElementById('eventSelector').value || "event";
             const school = getSchoolDisplayName().replace(/\s+/g, '_') || "school";
             const canvas = document.getElementById('instagramCanvas');
+            const story = document.getElementById('storyToggleSingle').checked;
             const link = document.createElement('a');
-            link.download = `${school}_${selectedEvent.replace(/\s+/g, '_')}.png`;
-            link.href = canvas.toDataURL('image/png');
+            link.download = `${school}_${selectedEvent.replace(/\s+/g, '_')}${story ? '_story' : ''}.png`;
+            link.href = story ? makeStoryDataUrl(canvas) : canvas.toDataURL('image/png');
             link.click();
+        }
+
+        // Places the 1080x1080 graphic in the middle of a 1080x1920 story canvas,
+        // with the background color above and below and thin accent bars top and bottom.
+        function makeStoryDataUrl(squareSource) {
+            const c = document.createElement('canvas');
+            c.width = 1080; c.height = 1920;
+            const x = c.getContext('2d');
+            x.fillStyle = getBgColor();
+            x.fillRect(0, 0, 1080, 1920);
+            x.fillStyle = getAccentColor();
+            x.fillRect(0, 0, 1080, 40);
+            x.fillRect(0, 1880, 1080, 40);
+            x.drawImage(squareSource, 0, 420, 1080, 1080);
+            return c.toDataURL('image/png');
+        }
+
+        function loadImg(url) {
+            return new Promise((res, rej) => { const i = new Image(); i.onload = () => res(i); i.onerror = rej; i.src = url; });
+        }
+
+        // Opens the phone's share sheet with the PNG attached. Where that isn't
+        // supported (most desktop browsers) it downloads the file instead.
+        async function shareOrDownload(dataUrl, filename) {
+            try {
+                const blob = await (await fetch(dataUrl)).blob();
+                const file = new File([blob], filename, { type: 'image/png' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file] });
+                    return;
+                }
+            } catch (e) {
+                if (e && e.name === 'AbortError') return;   // person closed the share sheet
+            }
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = dataUrl;
+            link.click();
+        }
+
+        async function shareInstagramGraphic() {
+            const selectedEvent = document.getElementById('eventSelector').value || "event";
+            const school = getSchoolDisplayName().replace(/\s+/g, '_') || "school";
+            const story = document.getElementById('storyToggleSingle').checked;
+            const canvas = document.getElementById('instagramCanvas');
+            const url = story ? makeStoryDataUrl(canvas) : canvas.toDataURL('image/png');
+            await shareOrDownload(url, `${school}_${selectedEvent.replace(/\s+/g, '_')}${story ? '_story' : ''}.png`);
+        }
+
+        let bulkSlideUrls = [];
+
+        async function bulkSlideFiles() {
+            const story = document.getElementById('storyToggleBulk').checked;
+            const out = [];
+            for (let i = 0; i < bulkSlideUrls.length; i++) {
+                if (!bulkSlideUrls[i]) continue;
+                let url = bulkSlideUrls[i];
+                if (story) url = makeStoryDataUrl(await loadImg(url));
+                const blob = await (await fetch(url)).blob();
+                out.push(new File([blob], `IG_Meet_Champions_Page_${i + 1}${story ? '_story' : ''}.png`, { type: 'image/png' }));
+            }
+            return out;
+        }
+
+        // One share sheet with every page attached (they arrive as separate images).
+        // If the browser can't share files, falls back to downloading them all.
+        async function shareAllBulkSlides() {
+            const files = await bulkSlideFiles();
+            if (!files.length) return;
+            try {
+                if (navigator.canShare && navigator.canShare({ files })) {
+                    await navigator.share({ files });
+                    return;
+                }
+            } catch (e) {
+                if (e && e.name === 'AbortError') return;
+            }
+            await saveFilesOneByOne(files);
+        }
+
+        async function downloadAllBulkSlides() {
+            const files = await bulkSlideFiles();
+            await saveFilesOneByOne(files);
+        }
+
+        // Small pause between files so browsers don't block the extra downloads.
+        async function saveFilesOneByOne(files) {
+            for (const f of files) {
+                const link = document.createElement('a');
+                link.download = f.name;
+                link.href = URL.createObjectURL(f);
+                link.click();
+                setTimeout(() => URL.revokeObjectURL(link.href), 10000);
+                await new Promise(r => setTimeout(r, 500));
+            }
+        }
+        async function shareBulkSlide(i) {
+            const story = document.getElementById('storyToggleBulk').checked;
+            let url = bulkSlideUrls[i];
+            if (story) url = makeStoryDataUrl(await loadImg(url));
+            await shareOrDownload(url, `IG_Meet_Champions_Page_${i + 1}${story ? '_story' : ''}.png`);
         }
 
         function updateScorePost() {
@@ -1393,7 +1507,14 @@
             const chosenFont = getSelectedFontFamily();
             
             container.innerHTML = "";
+            bulkSlideUrls = [];
             container.classList.remove('hidden');
+            const allBar = document.createElement('div');
+            allBar.className = "sm:col-span-2 grid grid-cols-2 gap-2";
+            allBar.innerHTML = `
+                <button onclick="shareAllBulkSlides()" class="bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider shadow-md">&#x1F4E4; Share All Pages</button>
+                <button onclick="downloadAllBulkSlides()" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2.5 rounded-lg text-xs uppercase tracking-wider shadow-md border border-gray-700">&#x1F4F8; Download All Pages</button>`;
+            container.appendChild(allBar);
 
             let rawWinners = [];
             let sortedEventNames = Array.from(document.getElementById('eventSelector').options).map(o => o.value);
@@ -1615,6 +1736,7 @@
                 let slideDataUrl = bulkCanvas.toDataURL('image/png');
                 drawLogosOnCanvas(bulkCtx);
                 slideDataUrl = bulkCanvas.toDataURL('image/png');
+                bulkSlideUrls[slideIndex] = slideDataUrl;
                 let graphicCardWrapper = document.createElement('div');
                 graphicCardWrapper.className = "bg-black p-3 rounded-xl border border-gray-800 flex flex-col justify-between items-center text-center space-y-3 shadow-md";
                 graphicCardWrapper.innerHTML = `
@@ -1624,16 +1746,22 @@
                             <img src="${slideDataUrl}" class="w-full h-full object-contain">
                         </div>
                     </div>
-                    <button onclick="downloadDirectBulkSlide('${slideDataUrl}', ${slideIndex + 1})" class="w-full bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2 rounded text-xs uppercase tracking-wider transition-all">📥 Download Page ${slideIndex + 1}</button>
+                    <div class="w-full grid grid-cols-2 gap-2">
+                        <button onclick="shareBulkSlide(${slideIndex})" class="bg-gradient-to-r from-pink-600 to-indigo-600 hover:opacity-90 text-white font-bold py-2 rounded text-xs uppercase tracking-wider">&#x1F4E4; Share</button>
+                        <button onclick="downloadDirectBulkSlide(${slideIndex})" class="bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 rounded text-xs uppercase tracking-wider border border-gray-700">&#x1F4F8; Download</button>
+                    </div>
                 `;
                 container.appendChild(graphicCardWrapper);
             });
         }
 
-        function downloadDirectBulkSlide(dataUrlString, indexNum) {
+        async function downloadDirectBulkSlide(i) {
+            const story = document.getElementById('storyToggleBulk').checked;
+            let url = bulkSlideUrls[i];
+            if (story) url = makeStoryDataUrl(await loadImg(url));
             const link = document.createElement('a');
-            link.download = `IG_Meet_Champions_Page_${indexNum}.png`;
-            link.href = dataUrlString;
+            link.download = `IG_Meet_Champions_Page_${i + 1}${story ? '_story' : ''}.png`;
+            link.href = url;
             link.click();
         }
 
