@@ -490,6 +490,7 @@
                 .replace(/\s*Varsity/gi, "")
                 .replace(/\s*Wheelchair/gi, "")
                 .replace(/\s*Seated/gi, "")
+                .replace(/\s*-\s*$/, "")
                 .trim();
 
             clean = clean.replace(/(\d+)\s*Meters/gi, "$1m");
@@ -901,6 +902,21 @@
 
                 if (line.includes("Mens Results")) { currentGenderSection = "Boys"; continue; }
                 if (line.includes("Womens Results")) { currentGenderSection = "Girls"; continue; }
+
+                // Athletic.net puts the event name on one line ("100 Meters", "High Jump") and the
+                // division/round on the next ("Varsity - Finals", "Wheelchair - Finals"). Join the two so
+                // the event keeps its name (and wheelchair events get their WC tag), instead of the
+                // division line replacing it with just "Boys"/"Girls".
+                if (/^(varsity|jv|junior varsity|frosh\w*|freshman|open|wheelchair|seated|novice)\b.*-\s*finals?\s*$/i.test(line)) {
+                    let p = i - 1;
+                    while (p >= 0 && !lines[p]) p--;
+                    const prev = p >= 0 ? lines[p] : '';
+                    if (prev && !/^(\d+\.|--)/.test(prev) && !/results\s*$/i.test(prev)) {
+                        currentEventName = cleanEventTitle(prev + ' ' + line, currentGenderSection);
+                        if (!parsedMeetDatabase[currentEventName]) parsedMeetDatabase[currentEventName] = [];
+                        continue;
+                    }
+                }
 
                 if (line.includes("Varsity") || line.includes("Relay") || line.includes("Wheelchair") || line.includes("Seated") || line.includes("Meters") || line.includes("WC") || line.includes("Hurdles") || line.includes("Shot Put") || line.includes("Discus")) {
                     if (line.includes("Results")) continue; 
